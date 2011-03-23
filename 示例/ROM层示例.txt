@@ -38,12 +38,9 @@ void elltest (void)
 
 	if ( ellregister ) {
 		
-		int apiaddress [4] = {
+		int apiaddress [1] = {
 			
-			(int)&fill_rectangle ,
-			(int)&draw_rectangle ,
-			(int)&draw_line ,
-			(int)&draw_file ,
+			(int)EllLog ,
 
 		} ;
 

@@ -112,8 +112,11 @@ void MemoryMonitorFree ( MEMORY_MONITOR* mem_monitor , int address ) {
 		
 		pre->next = walker->next ; 		
 		if ( 0 == pre->next ) mem_monitor->next = pre ;
+	# ifdef MTK_ELL
+		EllFREE ( (void*) &walker ) ;
+	# else
 		EllFREE ( walker ) ;
-		
+	# endif
 	}
 	
 }
@@ -129,10 +132,27 @@ void MemoryMonitorDestroy ( MEMORY_MONITOR* mem_monitor ) {
 	if ( !mem_monitor ) return ;
 
 	for ( walker = mem_monitor->head ; walker ; ) {
+
 		mem_monitor->next = walker->next ;
-		if ( walker->file ) EllFREE ( walker->file ) ;
-		EllFREE ( walker ) ;
+		
+		if ( walker->file ) {
+
+			# ifdef MTK_ELL
+				EllFREE ( (void*) &walker->file ) ;
+			# else
+				EllFREE ( walker->file ) ;
+			# endif
+
+		}
+
+		# ifdef MTK_ELL
+			EllFREE ( (void*) &walker ) ;
+		# else
+			EllFREE ( walker ) ;
+		# endif
+
 		walker = mem_monitor->next ;
+
 	}
 	
 }
@@ -164,7 +184,7 @@ int EllHalMemoryLeaked () {
 		MemoryMonitorDestroy ( &mem_monitor ) ;
 
 		//	EllLog ("%1.3f kb memory is leaked.\n",(float)(totall/1024)) ;
-		EllLog ("%d memory is leaked.\n",totall) ;
+		EllLog ( "memory leaked %d bytes totall.\n" , totall ) ;
 
 	# endif
 

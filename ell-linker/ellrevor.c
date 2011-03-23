@@ -63,7 +63,7 @@ int EllResolver ( int obid , char* path ) {
 	
 	EllHalFileRead ( file , &elf32_ehdr , sizeof(Elf32_Ehdr) , 1 ) ;
 	
-	if ( !EllElfMapCheckHeader ( elf32_ehdr.e_ident ) ) return 0 ;
+	if ( !EllElfMapCheckHeader ( (char* ) elf32_ehdr.e_ident ) ) return 0 ;
 	if ( !EllElfMapNolSectCreate ( obid , elf32_ehdr.e_shnum ) ) return 0 ;
 
 	sh_offset = elf32_ehdr.e_shoff ;

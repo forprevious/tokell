@@ -84,7 +84,7 @@ int EllInstall ( int routineset , char* application ) {
 	EllElfMapNolSectDestroy ( EllLinker.obidborder ) ;
 	EllElfMapRelocDestroy ( ell->TextRel.elf32_rel , EllLinker.obidborder ) ;
 	EllElfMapRelocDestroy ( ell->DataRel.elf32_rel , EllLinker.obidborder ) ;
-//	EllFreeEx ((void**)&ell->ObjectBased) ;
+	EllFreeEx ((void**)&ell->ObjectBased) ;
 
 	if ( !results ) EllDynamicPoolDestroy () ;
 	
@@ -114,7 +114,7 @@ int EllGetSymbolEntry ( int ell , char* symbol ) {
 	if ( -1 != address ) { 
 
 		if ( ELL_THUMB16_ROUTINE == EllLinker.routineset )
-			address = address + EllLinkerMemoryPool.base ;
+			address = address + EllLinkerMemoryPool.base + 1 ;
 		else if ( ELL_ARM32_ROUTINE == EllLinker.routineset )
 			address = address + EllLinkerMemoryPool.base ;
 		

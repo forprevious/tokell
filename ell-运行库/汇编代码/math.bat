@@ -1,2 +1,2 @@
-armasm -16 math.asm
+armasm --thumb math.asm
 pause
