@@ -65,7 +65,7 @@ extern ELLLINKER EllLinker ;
 extern ELLLINKERMEMORYPOOL EllLinkerMemoryPool ;
 
 extern int EllLocalLinker ( int obid , int file ) ;
-extern int EllGloabalLinker ( int obidborder ) ;
+extern int EllGlobalLinker ( int obidborder ) ;
 
 static int EllReloc ( Elf32_Rel* reloctab , int (*EllRelocKernal) (Elf32_Rel*,Elf32_Sym*, int) , int looper , int lborder , int obid ) ;
 static int EllTextReloc ( Elf32_Rel* elf32_rel , Elf32_Sym* elf32_sym , int obid ) ;
