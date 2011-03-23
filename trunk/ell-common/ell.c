@@ -289,7 +289,7 @@ int EllDynamicPoolDestroy () {
 	int obidlooper = 0 ;
 
 	if ( !ell ) return 0 ;
-printf(" %x\n",ell);
+
 	//	release symbol table
 	for ( obidlooper = 0 ; obidlooper < ell->ObjTotall ; obidlooper ++ ) {
 
@@ -787,6 +787,24 @@ void EllElfMapRelocDestroy ( Elf32_Rel** elf32_rel , int obidborder ) {
 	
 }
 
+void EllElfMapRelocRelaDestroy ( Elf32_Rela** elf32_rela , int obidborder ) {
+
+	//	author : Jelo Wang
+	//	(C)TOK
+
+	int obidlooper = 0 ;
+
+	if ( !elf32_rela ) return ;
+	
+	for ( obidlooper = 0 ; obidlooper < obidborder ; obidlooper ++ )  {
+
+		if ( elf32_rela[obidlooper]  ) EllFree ( elf32_rela[obidlooper] ) ;
+
+	}
+ 
+	EllFree ( elf32_rela ) ;
+	
+}
 
 # if 0
 int EllElfMapRelocRelaCreate ( Elf32_Rel* reloctab , int totall , int* looper , int* length ) {

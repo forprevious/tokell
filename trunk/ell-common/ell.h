@@ -95,6 +95,7 @@ extern int EllElfMapRelocRelCreate ( Elf32_Rel** elf32_rel , int obid , int tota
 extern int EllElfMapRelocRelInsert ( Elf32_Rel** elf32_rel , int obid , void* buffer ) ;
 extern int EllElfMapRelocGetLborder ( Elf32_Rel** elf32_rel , int obid ) ; 
 extern void EllElfMapRelocDestroy ( Elf32_Rel** elf32_rel , int obidborder ) ;
+extern void EllElfMapRelocRelaDestroy ( Elf32_Rela** elf32_rela , int obidborder ) ;
 extern char* EllWStrcpy ( signed char* strDestination , const signed char* strSource ) ;
 extern int EllUnicodeToAscii ( unsigned char* pOutBuffer , signed char* pInBuffer ) ;
 extern void EllAsciiToUnicode ( char *outbuffer , char *inbuffer ) ;
