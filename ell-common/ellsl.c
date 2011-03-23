@@ -119,6 +119,7 @@ int EllSlListDestroy ( int lt ) {
 	for ( walker = list->head ; walker ; ) {
 
 		list->next = walker->next ; 
+		if ( walker->element ) EllFree ( walker->element ) ;
 		EllFree ( walker ) ;
 		walker = list->next ; 
 

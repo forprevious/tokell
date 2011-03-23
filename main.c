@@ -39,19 +39,22 @@ int main ( int argc , char* argv [] ) {
 
 	if ( ellregister ) {
 		
-		int apiaddress [4] = {
+		int apiaddress [4] = { 
 		
 			0 , 0 , 0 , 0
 
 		} ;
 
 		//	将ROM系统层接口地址传递给ell 
-		ellregister ( apiaddress , sizeof (apiaddress) ) ;
+//		ellregister ( apiaddress , sizeof (apiaddress) ) ;
 
 	}
 	
-	if ( ellentry ) ellentry () ;
-	
+//	if ( ellentry ) ellentry () ;
+
+	EllUninstall ( ell ) ;
+	EllHalMemoryLeaked () ;
+
 	return 1 ;
 
 }

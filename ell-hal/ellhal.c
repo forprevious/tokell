@@ -41,6 +41,7 @@
 	# define EllFREE free
 # endif
 
+# define MEMORY_MONITOR_ENABLE
 # ifdef MEMORY_MONITOR_ENABLE
 MEMORY_MONITOR mem_monitor = { 0 , 0 , 0 , 0 , 0 , 0 } ;
 int MemoryMonitorInit ( MEMORY_MONITOR* mem_monitor ) {
@@ -82,7 +83,7 @@ void MemoryMonitorAdd ( MEMORY_MONITOR* mem_monitor , char* file , int line , in
 	newmem->line = line ; 
 	newmem->length = length ;
 	newmem->address = address ;
-	newmem->head = 0 ;
+	newmem->head = mem_monitor->next ;
 	newmem->next = 0 ;
 
 	if ( 0 == mem_monitor->head ) {
@@ -102,20 +103,23 @@ void MemoryMonitorFree ( MEMORY_MONITOR* mem_monitor , int address ) {
 	//	(C)TOK
 
 	MEMORY_MONITOR* walker = mem_monitor->head ;
-	MEMORY_MONITOR* pre = mem_monitor ;
-	
+
 	if ( !address ) return ;
 
-	for ( ;walker && walker->address != address ;pre = walker , walker=walker->next) ;
+	for ( ;walker && walker->address != address ;walker = walker->next ) ;
 
 	if ( walker ) {
+
+		if ( walker->head ) 
+		walker->head->next = walker->next ; 
 		
-		pre->next = walker->next ; 		
-		if ( 0 == pre->next ) mem_monitor->next = pre ;
+		if ( walker->next ) 
+		walker->next->head = walker->head ;
+		
 	# ifdef MTK_ELL
-		EllFREE ( (void*) &walker ) ;
+	//	EllFREE ( (void*) &walker ) ;
 	# else
-		EllFREE ( walker ) ;
+	//	EllFREE ( walker ) ;
 	# endif
 	}
 	
