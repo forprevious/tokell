@@ -84,8 +84,8 @@ int EllInstall ( int routineset , char* application ) {
 	EllElfMapNolSectDestroy ( EllLinker.obidborder ) ;
 	EllElfMapRelocDestroy ( ell->TextRel.elf32_rel , EllLinker.obidborder ) ;
 	EllElfMapRelocDestroy ( ell->DataRel.elf32_rel , EllLinker.obidborder ) ;
-	EllElfMapRelocDestroy ( ell->TextRela.elf32_rela , EllLinker.obidborder ) ;
-	EllElfMapRelocDestroy ( ell->DataRela.elf32_rela , EllLinker.obidborder ) ;	
+	EllElfMapRelocRelaDestroy ( ell->TextRela.elf32_rela , EllLinker.obidborder ) ;
+	EllElfMapRelocRelaDestroy ( ell->DataRela.elf32_rela , EllLinker.obidborder ) ;	
 	EllFreeEx ((void**)&ell->ObjectBased) ;
 
 	if ( !results ) EllDynamicPoolDestroy () ;

@@ -41,8 +41,6 @@ typedef enum {
 
 } ELLHAL_FILE ;
 
-//# define MEMORY_MONITOR_ENABLE
-
 extern void* EllNormalloc ( long int length , char* file , int line )  ;
 
 # define EllMalloc(length) EllNormalloc(length,__FILE__,__LINE__)
