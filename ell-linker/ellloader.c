@@ -2,21 +2,23 @@
 /*
 
 +	Executable Linking-Library 1.0.0.
-+	Architecture : ARMv
++	Architecture : ARMv6
 
-+	You can redistribute it and/or modify it under the terms of the gnu general public license	
-+	as published by the free software foundation, either version 3 of the license or any later 	
-+	version.this program is distributed in the hope	that it will be useful,but without any 		
-+	warranty.without even the implied warranty of merchantability or fitness for a particular 	
-+	purpose.																					
++	'Executable Linking-Library' is a Dynamic Linking solution for closed runing environment.
++	The project lunched by Jelo Wang since 2010 from 'Techniques of Knowledge' community. 
+
++	You can redistribute it and/or modify it under the terms of the gnu general public version 3 of 
++	the license as published by the free software foundation.this program is distributed in the hope 
++	that it will be useful,but without any warranty.without even the implied warranty of merchantability 
++	or fitness for a particular purpose.																					
 																												
-+	(c)	Techniques of Knowledge
-+		an open source group since 2008
-+		page : http://www.tok.cc
-+		email : wqw85@sina.com
++	(C)	突壳开源Techniques of Knowledge
++		an open source community since 2008
++		Community : http://www.tok.cc
++		Contact Us : jelo.wang@gmail.com
 
-+		技术支持、功能扩展、平台搭建。
-+		欢迎联系我们。
++		技术支持、功能扩展、平台搭建，欢迎与我们联系。
++		我们将为您提供有偿的，强力的服务。
 
 */
 
@@ -29,7 +31,7 @@
 
 void EllMemoryRegister ( void* buffer , int length ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	register a memory pool for ell loading & linking & run
 	//	(C)TOK
 
@@ -43,7 +45,7 @@ void EllMemoryRegister ( void* buffer , int length ) {
 
 int EllInstall ( int routineset , char* application ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	notes : load elf files and linking
 	//	(C)TOK	
 
@@ -55,6 +57,8 @@ int EllInstall ( int routineset , char* application ) {
 	EllDynamicPoolSetCurrent ( (int)ell ) ;
 	if ( !EllDynamicPoolInsertApplication ( application ) ) return 0 ;
 
+	EllLog ( "EllInstall start\n" ) ;
+	
 	EllLinker.routineset = routineset ;
 	
 	for ( EllSlListSetIterator ( ell->ObjectList , ELLSLSEEK_HEAD ) ; EllSlListIteratorPermit  ( ell->ObjectList ) ; EllSlListIteratorNext ( ell->ObjectList ) ) {
@@ -80,11 +84,13 @@ int EllInstall ( int routineset , char* application ) {
 	EllElfMapNolSectDestroy ( EllLinker.obidborder ) ;
 	EllElfMapRelocDestroy ( ell->TextRel.elf32_rel , EllLinker.obidborder ) ;
 	EllElfMapRelocDestroy ( ell->DataRel.elf32_rel , EllLinker.obidborder ) ;
-	EllFreeEx (&ell->ObjectBased) ;
+//	EllFreeEx ((void**)&ell->ObjectBased) ;
 
 	if ( !results ) EllDynamicPoolDestroy () ;
+	
+	EllDump ( "e:\\ellmem.elle" , (void*)EllLinkerMemoryPool.pool , EllLinkerMemoryPool.looper ) ;
 
-	EllDump ( "e:\\ell\\ellmem.elle" , (void*)EllLinkerMemoryPool.pool , EllLinkerMemoryPool.looper ) ;
+	EllLog ( "EllInstall end\n" ) ;
 	
 	return (int)ell ;
 	
@@ -92,7 +98,7 @@ int EllInstall ( int routineset , char* application ) {
 
 int EllGetSymbolEntry ( int ell , char* symbol ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	get symbol entry
 	//	(C)TOK
 
@@ -105,7 +111,7 @@ int EllGetSymbolEntry ( int ell , char* symbol ) {
 	if ( -1 != address ) { 
 
 		if ( ELL_THUMB16_ROUTINE == EllLinker.routineset )
-			address = address + EllLinkerMemoryPool.base + 1 ;
+			address = address + EllLinkerMemoryPool.base ;
 		else if ( ELL_ARM32_ROUTINE == EllLinker.routineset )
 			address = address + EllLinkerMemoryPool.base ;
 		
@@ -117,7 +123,7 @@ int EllGetSymbolEntry ( int ell , char* symbol ) {
 
 void EllUninstall ( int ell ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	(C)TOK
 
 	EllDynamicPoolSetCurrent ( ell ) ;

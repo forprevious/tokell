@@ -2,35 +2,50 @@
 /*
 
 +	Executable Linking-Library 1.0.0.
-+	Architecture : ARMv
++	Architecture : ARMv6
 
-+	You can redistribute it and/or modify it under the terms of the gnu general public license	
-+	as published by the free software foundation, either version 3 of the license or any later 	
-+	version.this program is distributed in the hope	that it will be useful,but without any 		
-+	warranty.without even the implied warranty of merchantability or fitness for a particular 	
-+	purpose.																					
++	'Executable Linking-Library' is a Dynamic Linking solution for closed runing environment.
++	The project lunched by Jelo Wang since 2010 from 'Techniques of Knowledge' community. 
+
++	You can redistribute it and/or modify it under the terms of the gnu general public version 3 of 
++	the license as published by the free software foundation.this program is distributed in the hope 
++	that it will be useful,but without any warranty.without even the implied warranty of merchantability 
++	or fitness for a particular purpose.																					
 																												
-+	(c)	Techniques of Knowledge
-+		an open source group since 2008
-+		page : http://www.tok.cc
-+		email : wqw85@sina.com
++	(C)	突壳开源Techniques of Knowledge
++		an open source community since 2008
++		Community : http://www.tok.cc
++		Contact Us : jelo.wang@gmail.com
 
-+		技术支持、功能扩展、平台搭建。
-+		欢迎联系我们。
++		技术支持、功能扩展、平台搭建，欢迎与我们联系。
++		我们将为您提供有偿的，强力的服务。
 
 */
 
 # include "ell.h"
 # include "ellhal.h"
 
-# define EllMALLOC malloc
-# define EllFREE free
+# ifdef MTK_ELL
+	# include "FileManagerGProt.h"
+	# include "Fs_type.h"
+	# include "Fs_func.h"
+# endif
+
+# ifdef MTK_ELL
+	extern void *med_alloc_ext_mem_ext ( int size , char* file_p , long line_p ) ;
+	extern void med_free_ext_mem_ext ( void **pointer , char* file_p , long line_p ) ;
+	# define EllMALLOC(size) med_alloc_ext_mem_ext(size,__FILE__,__LINE__)
+	# define EllFREE(buffer) med_free_ext_mem_ext(buffer,__FILE__,__LINE__)
+# else
+	# define EllMALLOC malloc
+	# define EllFREE free
+# endif
 
 # ifdef MEMORY_MONITOR_ENABLE
 MEMORY_MONITOR mem_monitor = { 0 , 0 , 0 , 0 , 0 , 0 } ;
 int MemoryMonitorInit ( MEMORY_MONITOR* mem_monitor ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	since : 20100418
 	//	(C)TOK
 
@@ -49,7 +64,7 @@ int MemoryMonitorInit ( MEMORY_MONITOR* mem_monitor ) {
 
 void MemoryMonitorAdd ( MEMORY_MONITOR* mem_monitor , char* file , int line , int length , int address ) {
 	
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	since : 20100418
 	//	(C)TOK
 
@@ -82,7 +97,7 @@ void MemoryMonitorAdd ( MEMORY_MONITOR* mem_monitor , char* file , int line , in
 
 void MemoryMonitorFree ( MEMORY_MONITOR* mem_monitor , int address ) {
 	
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	since : 20100418
 	//	(C)TOK
 
@@ -105,7 +120,7 @@ void MemoryMonitorFree ( MEMORY_MONITOR* mem_monitor , int address ) {
 
 void MemoryMonitorDestroy ( MEMORY_MONITOR* mem_monitor ) {
 	
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	since : 20100418
 	//	(C)TOK
 
@@ -124,7 +139,7 @@ void MemoryMonitorDestroy ( MEMORY_MONITOR* mem_monitor ) {
 
 int EllHalMemoryLeaked () {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	since : 20091129
 
 	# ifdef MEMORY_MONITOR_ENABLE
@@ -160,7 +175,7 @@ int EllHalMemoryLeaked () {
 
 void* EllNormalloc ( long int length , char* file , int line ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	notes : malloc
 	//	since : 20090809
 	
@@ -183,7 +198,7 @@ void* EllNormalloc ( long int length , char* file , int line ) {
 
 int EllFree ( void* buffer ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	notes : free
 	//	since : 20090809
 
@@ -191,16 +206,19 @@ int EllFree ( void* buffer ) {
 		MemoryMonitorFree ( &mem_monitor , (int)buffer ) ;
 	# endif
 
- 	EllFREE ( buffer ) ;
+# ifdef MTK_ELL
+		EllFREE ( (void**)&buffer ) ;
+# else
+		EllFREE ( *buffer ) ;
+# endif
 
 	return 1 ;
 
 }
 
-
 int EllFreeEx ( void** buffer ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	notes : free
 	//	since : 20090809
 
@@ -208,7 +226,11 @@ int EllFreeEx ( void** buffer ) {
 		MemoryMonitorFree ( &mem_monitor , (int)*buffer ) ;
 	# endif
 
- 	EllFREE ( *buffer ) ;
+# ifdef MTK_ELL
+	EllFREE ( buffer ) ;
+# else
+	EllFREE ( *buffer ) ;
+# endif
 
 	*buffer = 0 ;
 
@@ -218,10 +240,24 @@ int EllFreeEx ( void** buffer ) {
 
 int EllHalFileOpen ( char* path , int flag ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	notes : fopen
 	//	since : 20090809
 
+# ifdef MTK_ELL
+
+	char unpath [ 256 ] = {0} ;
+
+	EllAsciiToUnicode ( unpath , path ) ;
+	
+	switch ( flag ) {
+
+		case ELLHAL_READ_OPEN : return (int) FS_Open ( (unsigned short* )unpath , FS_READ_ONLY ) ; 
+		case ELLHAL_CREW_OPEN : return (int) FS_Open ( (unsigned short* )unpath , FS_CREATE_ALWAYS ) ; 		
+   
+	}
+
+# else
 
 	switch ( flag ) {
 
@@ -230,20 +266,26 @@ int EllHalFileOpen ( char* path , int flag ) {
 
 	}
 
+# endif
+
 	return 0 ;
 	
 }
 
 int EllHalFileSeek ( int file , int offset , int direct ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	notes : fseek
 	//	since : 20090809
 
 	switch ( direct ) {
-		
-		case ELLHAL_SEEK_HEAD : return fseek ( (FILE*)file , offset , direct ) ;
 
+	# ifdef MTK_ELL
+		case ELLHAL_SEEK_HEAD : return FS_Seek( file , offset , FS_FILE_BEGIN ) ;
+	# else
+		case ELLHAL_SEEK_HEAD : return fseek ( (FILE*)file , offset , direct ) ;
+	# endif
+	
 	}
 
 	return 0 ;	
@@ -252,39 +294,67 @@ int EllHalFileSeek ( int file , int offset , int direct ) {
 
 int EllHalFileRead ( int file , void* buffer , int size , int counter ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	notes : fread
 	//	since : 20090809
 
+# ifdef MTK_ELL
+	unsigned int read = 0 ;
+	return FS_Read( file , buffer , counter*size , &read );
+# else
 	return fread ( buffer , size , counter , (FILE*)file ) ;
+# endif
 
 }
 
 int EllHalFileWrite ( int file , void* buffer , int size , int counter ) {
 	
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	notes : fwrite
 	//	since : 20090809
 
+# ifdef MTK_ELL
+	unsigned int write = 0 ;
+	return FS_Write( file , buffer , counter*size , &write );
+# else
 	return fwrite ( buffer , size , counter , (FILE*)file ) ;
+# endif
 
 }
 
 int EllHalFileEnd ( int file ) {
 	
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	notes : fwrite
 	//	since : 20090809
 
+# ifdef MTK_ELL
+	unsigned int position = 0;
+	unsigned int length = 0;
+	FS_GetFilePosition ( file , &position ) ; 
+	FS_GetFileSize ( file , &length ) ; 
+	return position >= length ;
+# else
 	return feof ( (FILE*)file ) ;
+# endif
 
 }
 
 int EllHalFileLength ( int file ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	notes : fseek
 	//	since : 20090809
+
+# ifdef MTK_ELL	
+
+	unsigned int length = 0;
+
+	FS_GetFileSize ( file , &length ) ; 
+	
+	return length ;
+	
+# else
 	
 	int length = 0;
 
@@ -304,21 +374,27 @@ int EllHalFileLength ( int file ) {
 	
 	return length ;
 
+# endif
+
 }
 
 int EllHalFileClose ( int file ) {
 	
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	notes : fclose
 	//	since : 20090809
-	
+
+# ifdef MTK_ELL
+	return FS_Close ( file ) ;
+# else
 	return fclose ( (FILE*)file ) ;
+# endif
 
 }
 
 void EllMemcpy ( void* target_memory , void* source_memory , int length ) {
 	
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	since : 20100107
 
 	memcpy ( target_memory , source_memory , length ) ; 

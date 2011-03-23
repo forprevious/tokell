@@ -2,21 +2,23 @@
 /*
 
 +	Executable Linking-Library 1.0.0.
-+	Architecture : ARMv
++	Architecture : ARMv6
 
-+	You can redistribute it and/or modify it under the terms of the gnu general public license	
-+	as published by the free software foundation, either version 3 of the license or any later 	
-+	version.this program is distributed in the hope	that it will be useful,but without any 		
-+	warranty.without even the implied warranty of merchantability or fitness for a particular 	
-+	purpose.																					
++	'Executable Linking-Library' is a Dynamic Linking solution for closed runing environment.
++	The project lunched by Jelo Wang since 2010 from 'Techniques of Knowledge' community. 
+
++	You can redistribute it and/or modify it under the terms of the gnu general public version 3 of 
++	the license as published by the free software foundation.this program is distributed in the hope 
++	that it will be useful,but without any warranty.without even the implied warranty of merchantability 
++	or fitness for a particular purpose.																					
 																												
-+	(c)	Techniques of Knowledge
-+		an open source group since 2008
-+		page : http://www.tok.cc
-+		email : wqw85@sina.com
++	(C)	突壳开源Techniques of Knowledge
++		an open source community since 2008
++		Community : http://www.tok.cc
++		Contact Us : jelo.wang@gmail.com
 
-+		技术支持、功能扩展、平台搭建。
-+		欢迎联系我们。
++		技术支持、功能扩展、平台搭建，欢迎与我们联系。
++		我们将为您提供有偿的，强力的服务。
 
 */
 
@@ -24,11 +26,17 @@
 # include "ellsl.h"
 # include "ellhal.h"
 
+# ifdef MTK_ELL
+	# include "FileManagerGProt.h"
+	# include "Fs_type.h"
+	# include "Fs_func.h"
+# endif
+
 ELL* ell = 0 ;
 
 int EllDynamicPoolCreate () {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	(C)TOK
 
 	//	notes : Create an Excutable Linked Library
@@ -45,7 +53,7 @@ int EllDynamicPoolCreate () {
 
 void EllDynamicPoolSetCurrent ( int ella ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	(C)TOK
 
 	ell = (ELL* ) ella ;
@@ -54,7 +62,7 @@ void EllDynamicPoolSetCurrent ( int ella ) {
 
 int EllDynamicPoolInsertApplication ( char* application ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	(C)TOK
 
 	//	notes : Insert an application to the DynamicPool
@@ -103,7 +111,7 @@ int EllDynamicPoolInsertApplication ( char* application ) {
 
 int EllDynamicPoolCreateSymbols ( int obid , int totall ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	notes : Create a Symbols pool
 	//	(C)TOK
 
@@ -131,7 +139,7 @@ int EllDynamicPoolCreateSymbols ( int obid , int totall ) {
 
 int EllDynamicPoolInsertSymbol ( int obid , void* buffer , char* name , int index ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	notes : Insert a Symbol to the application
 	//	(C)TOK
 
@@ -174,7 +182,7 @@ int EllDynamicPoolInsertSymbol ( int obid , void* buffer , char* name , int inde
 
 int EllDynamicPoolGetLborder ( int obid ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	(C)TOK
 
 	int lborder = 0 ;
@@ -194,7 +202,7 @@ int EllDynamicPoolGetLborder ( int obid ) {
 
 Elf32_Sym* EllDynamicPoolLocalGetSymbol ( int obid , int info ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	notes : Get a symbol
 	//	(C)TOK
 
@@ -207,7 +215,7 @@ Elf32_Sym* EllDynamicPoolLocalGetSymbol ( int obid , int info ) {
 
 Elf32_Sym* EllDynamicPoolGlobalGetSymbol ( int obidborder , char* name ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	notes : Get a global symbol on global scope
 	//	(C)TOK
 
@@ -239,7 +247,7 @@ Elf32_Sym* EllDynamicPoolGlobalGetSymbol ( int obidborder , char* name ) {
 
 int EllDynamicPoolGetSymbolEntry ( char* name ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	notes : Get a func symbol or objective symbol
 	//	(C)TOK
 
@@ -274,7 +282,7 @@ int EllDynamicPoolGetSymbolEntry ( char* name ) {
 
 int EllDynamicPoolDestroy () {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	(C)TOK
 
 	int obidlooper = 0 ;
@@ -292,10 +300,29 @@ int EllDynamicPoolDestroy () {
 		
 }
 
+# ifdef MTK_ELL
+int EllGetAllObjectFileFromDirectory ( int list , char* application ) {
+
+	//	author : Jelo Wang
+	//	notes : Get all obejct files from a directory and save it with a Linked-List
+	//	(C)TOK
+
+	int counter = 0 ;
+
+	char path [256] = { 0 } ;
+		
+	EllSlListInsert ( list , (int)"e:\\ell\\ellapp.ell" ) ;
+		
+	counter ++ ;
+	
+	return counter ;
+	
+}
+#else
 # include "windows.h"
 int EllGetAllObjectFileFromDirectory ( int list , char* application ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	notes : Get all obejct files from a directory and save it with a Linked-List
 	//	(C)TOK
 
@@ -330,11 +357,11 @@ int EllGetAllObjectFileFromDirectory ( int list , char* application ) {
 	return counter ;
 	
 }
-
+#endif
 
 int EllElfMapCheckHeader ( char* value ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	(C)TOK
 
 	char elf_header_legal_value [7] = {
@@ -358,7 +385,7 @@ int EllElfMapCheckHeader ( char* value ) {
 
 int EllElfMapNolSectCreate ( int obid , int totall ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	(C)TOK
 
 	int value = 0 ;
@@ -386,7 +413,7 @@ int EllElfMapNolSectCreate ( int obid , int totall ) {
 
 int EllElfMapNolSectInsert ( int obid , int index , void* buffer , const char* name ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	(C)TOK
 
 	int looper = 0 ;
@@ -423,7 +450,7 @@ int EllElfMapNolSectInsert ( int obid , int index , void* buffer , const char* n
 
 int EllElfMapNolSectGet ( int obid , char* name ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	(C)TOK
 
 	int looper = 0 ;
@@ -459,7 +486,7 @@ int EllElfMapNolSectGet ( int obid , char* name ) {
 
 int EllElfMapNolSectGetWithIndex ( int obid , int index ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	(C)TOK
 
 	int looper = 0 ;
@@ -492,7 +519,7 @@ int EllElfMapNolSectGetWithIndex ( int obid , int index ) {
 
 int EllElfMapNolSectGetLborder ( int obid ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	(C)TOK
 
 	int lborder = 0 ;
@@ -513,7 +540,7 @@ int EllElfMapNolSectGetLborder ( int obid ) {
 
 void EllElfMapNolSectDestroy ( int obidborder ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	(C)TOK
 
 	int obidlooper = 0 ;
@@ -533,7 +560,7 @@ void EllElfMapNolSectDestroy ( int obidborder ) {
 
 int EllElfMapRelocRelCreate ( Elf32_Rel** elf32_rel , int obid , int totall ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	(C)TOK
 
 	int value = 0 ;
@@ -563,7 +590,7 @@ int EllElfMapRelocRelCreate ( Elf32_Rel** elf32_rel , int obid , int totall ) {
 
 int EllElfMapRelocRelInsert ( Elf32_Rel** elf32_rel , int obid , void* buffer ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	(C)TOK
 
 	int looper = 0 ;
@@ -598,7 +625,7 @@ int EllElfMapRelocRelInsert ( Elf32_Rel** elf32_rel , int obid , void* buffer ) 
 
 int EllElfMapRelocGetLborder ( Elf32_Rel** elf32_rel , int obid ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	(C)TOK
 
 	int lborder = 0 ;
@@ -618,7 +645,7 @@ int EllElfMapRelocGetLborder ( Elf32_Rel** elf32_rel , int obid ) {
 
 void EllElfMapRelocDestroy ( Elf32_Rel** elf32_rel , int obidborder ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	(C)TOK
 
 	int obidlooper = 0 ;
@@ -640,7 +667,7 @@ void EllElfMapRelocDestroy ( Elf32_Rel** elf32_rel , int obidborder ) {
 int EllElfMapRelocRelaCreate ( Elf32_Rel* reloctab , int totall , int* looper , int* length ) {
 
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	(C)TOK
 
 	if ( !totall || !reloctab ) return 0 ;
@@ -665,7 +692,7 @@ int EllElfMapRelocRelaCreate ( Elf32_Rel* reloctab , int totall , int* looper , 
 int EllElfMapRelocRelaInsert ( Elf32_Rela* reloctab , void* buffer , int* looper , int length ) {
 
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	(C)TOK
 
 	if ( !reloctab ) return 0 ;
@@ -682,9 +709,33 @@ int EllElfMapRelocRelaInsert ( Elf32_Rela* reloctab , void* buffer , int* looper
 }
 # endif
 
+void EllAsciiToUnicode ( char *outbuffer , char *inbuffer ) {
+
+	//author: Jelo Wang
+	//since : 20090625
+	//(c)MET
+	
+	//(1) 参数：输出串 outbuffer unicode
+	//(2) 参数：输入串 inbuffer asiic
+
+    signed short count = -1 ;
+
+    while (*inbuffer != '\0') {
+
+        outbuffer[++count] = *inbuffer ;
+        outbuffer[++count] = 0 ;
+        inbuffer++ ;
+
+    }
+
+    outbuffer[++count] = '\0' ;
+    outbuffer[++count] = '\0' ;
+	
+}
+
 void EllDump ( char* path , void* buffer , int length ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	(C)TOK
 
 	int file = EllHalFileOpen ( path , ELLHAL_CREW_OPEN ) ;
@@ -696,15 +747,69 @@ void EllDump ( char* path , void* buffer , int length ) {
 
 void EllLog ( const char* message , ... ) {
 
-	//	author : WANG QUANWEI
+	//	author : Jelo Wang
 	//	(C)TOK
 
 	//	notes : log
 	
-	va_list ap ;   
-	va_start ( ap , message ) ;   
-	vprintf ( message , ap ) ;
-	va_end ( ap ) ;
+	static int times = 0 ;
+	static int file = -1 ;  
+	unsigned int write = 0 ;
 
+	char* path = "e:\\elllog.txt";
+	
+	char str [1024] ;
+		
+	va_list args;
+	va_start ( args , message ) ;
+	vsprintf ( str , message , args ) ;
+	va_end (args) ;
+		
+	if ( 0 == times ) {
+		file = EllHalFileOpen ( path , ELLHAL_CREW_OPEN ) ;
+		times ++ ;	
+	}
+	
+	if ( 0 > file ) return ;
+
+	EllHalFileWrite ( file , str , 1 , strlen(str) ) ;
+
+	return ;
+			
 }
+
+
+/*
+void tok_ell_log ( const char* message , ... ) {
+
+	//author : Jelo Wang
+	//since : 20091210
+
+	static int times = 0 ;
+	static int file = -1 ;
+	unsigned int write = 0 ;
+	unsigned short* path = L"e:\\mmclog.txt";
+
+	char str [1024] ;
+	
+  	va_list args;
+	va_start ( args , message ) ;
+	vsprintf ( str , message , args ) ;
+	va_end (args) ;
+			
+	if ( 0 == times ) {
+		file = FS_Open ( path , FS_CREATE_ALWAYS ) ;
+		times ++ ;  
+	}
+
+	if ( 0 > file ) return ;
+
+	FS_Write ( file , str , strlen(str) , &write ) ;
+
+	return ;
+
+	
+}
+*/
+
 
