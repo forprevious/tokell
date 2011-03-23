@@ -285,12 +285,28 @@ int EllDynamicPoolDestroy () {
 	//	author : Jelo Wang
 	//	(C)TOK
 
+	int counter = 0 ;
 	int obidlooper = 0 ;
 
 	if ( !ell ) return 0 ;
-	
-	for ( obidlooper = 0 ; obidlooper < ell->ObjTotall ; obidlooper ++ ) 
-		EllFree ( ell->Sym.elf32_sym[obidlooper] ) ;
+printf(" %x\n",ell);
+	//	release symbol table
+	for ( obidlooper = 0 ; obidlooper < ell->ObjTotall ; obidlooper ++ ) {
+
+		int totall_symbol = 0 ;
+		Elf32_Sym* elf32_sym = (Elf32_Sym*)((int)ell->Sym.elf32_sym[obidlooper]+1*sizeof(Elf32_Sym)) ;
+
+		totall_symbol = elf32_sym->st_name ;
+
+		for ( counter = 2 ; counter < totall_symbol ; counter ++ ) {
+			elf32_sym = (Elf32_Sym*)((int)ell->Sym.elf32_sym[obidlooper]+counter*sizeof(Elf32_Sym)) ;
+			if ( elf32_sym->st_name ) {
+				EllFree ( elf32_sym->st_name ) ;
+			}			
+		}
+		EllFree ( (void*) ell->Sym.elf32_sym[obidlooper] ) ;
+				
+	}
 
 	EllFree ( ell->Sym.elf32_sym ) ;
 
@@ -462,7 +478,7 @@ int EllGetAllObjectFileFromDirectory ( int list , char* application ) {
 	} 
 
 	FindClose(hDir);
-	
+
 	return counter ;
 	
 }
@@ -937,14 +953,18 @@ void EllLog ( const char* message , ... ) {
 	va_start ( args , message ) ;
 	vsprintf ( str , message , args ) ;
 	va_end (args) ;
-		
+	
+	# ifdef WIN32
+		printf ( str ) ;
+	# endif
+
 	if ( 0 == times ) {
 		file = EllHalFileOpen ( path , ELLHAL_CREW_OPEN ) ;
 		times ++ ;	
 	}
 	
-	if ( 0 > file ) return ;
-
+	if ( !file ) return ;
+	
 	EllHalFileWrite ( file , str , 1 , strlen(str) ) ;
 
 	return ;
