@@ -209,7 +209,7 @@ int EllFree ( void* buffer ) {
 # ifdef MTK_ELL
 		EllFREE ( (void**)&buffer ) ;
 # else
-		EllFREE ( *buffer ) ;
+		EllFREE ( buffer ) ;
 # endif
 
 	return 1 ;

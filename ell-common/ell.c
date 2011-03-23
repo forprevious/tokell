@@ -32,7 +32,7 @@
 	# include "Fs_func.h"
 # endif
 
-ELL* ell = 0 ;
+static ELL* ell = 0 ;
 
 int EllDynamicPoolCreate () {
 
@@ -615,7 +615,7 @@ int EllElfMapNolSectGetWithIndex ( int obid , int index ) {
 		
 		elf32_shdr = (Elf32_Shdr* )((int)ell->Shdr.elf32_shdr[obid]+looper*sizeof(Elf32_Shdr)) ;
 				
-		if ( index == elf32_shdr->sh_flags  ) {
+		if ( index == (int) elf32_shdr->sh_flags  ) {
 		
 			return (int)((int)ell->Shdr.elf32_shdr[obid]+looper*sizeof(Elf32_Shdr)) ;
 

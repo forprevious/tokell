@@ -31,7 +31,7 @@
 # include <stdio.h> 
 
 //	for MTK system
-# define MTK_ELL
+//# define MTK_ELL
 
 //# define ELL_DEBUG
 
@@ -82,6 +82,7 @@ extern int EllDynamicPoolInsertSymbol ( int obid , void* buffer , char* name , i
 extern Elf32_Sym* EllDynamicPoolLocalGetSymbol ( int obid , int info ) ;
 extern Elf32_Sym* EllDynamicPoolGlobalGetSymbol ( int obidborder , char* name ) ;
 extern int EllDynamicPoolGetSymbolEntry ( char* name ) ;
+extern int EllElfMapCheckHeader ( char* value ) ;
 extern int EllDynamicPoolDestroy () ;
 extern int EllGetAllObjectFileFromDirectory ( int list , char* application ) ;
 extern int EllElfMapNolSectCreate ( int obid , int totall ) ;
