@@ -73,6 +73,8 @@ int EllSlListInsert ( int lt , int element ) {
 		list->next->next = newn ;
 		list->next = newn ;
 	}
+	
+	return 1 ;
 
 }
 
@@ -123,6 +125,8 @@ int EllSlListDestroy ( int lt ) {
 	}
 
 	EllFree ( list ) ;
+
+	return 1 ;
 
 }
 
@@ -249,6 +253,8 @@ int EllSlGetString ( int file , int position , char* name ) {
 # endif
 
 	name[walker] = 0 ;
+
+	return 1 ;
 
 }
 
