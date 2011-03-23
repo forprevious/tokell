@@ -32,7 +32,7 @@
 	# include "Fs_func.h"
 # endif
 
-static ELL* ell = 0 ;
+ELL* ell = 0 ;
 
 int EllDynamicPoolCreate () {
 

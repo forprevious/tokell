@@ -1,7 +1,7 @@
 
 # include "ellloader.h"
 
-int ell = 0 ;
+static int ell = 0 ;
 
 typedef void (*ELLREGISTER ) ( int* address , int length ) ;
 ELLREGISTER ellregister = 0 ;
