@@ -301,14 +301,14 @@ int EllDynamicPoolDestroy () {
 		for ( counter = 2 ; counter < totall_symbol ; counter ++ ) {
 			elf32_sym = (Elf32_Sym*)((int)ell->Sym.elf32_sym[obidlooper]+counter*sizeof(Elf32_Sym)) ;
 			if ( elf32_sym->st_name ) {
-				EllFree ( elf32_sym->st_name ) ;
+				EllFree ( (void*) elf32_sym->st_name ) ;
 			}			
 		}
 		EllFree ( (void*) ell->Sym.elf32_sym[obidlooper] ) ;
 				
 	}
 
-	EllFree ( ell->Sym.elf32_sym ) ;
+	EllFree ( (void*) ell->Sym.elf32_sym ) ;
 
 	EllFreeEx ( (void**)&ell ) ; 
 
@@ -870,7 +870,7 @@ char* EllWStrcpy ( signed char* strDestination , const signed char* strSource ) 
 			
         }
 		
-        return temp;
+        return (char* ) temp;
 
     }
 
