@@ -1,0 +1,31 @@
+
+typedef void (*FILL_RECT)(int,int,int,int,int) ;
+FILL_RECT fill_rect = 0 ;
+
+typedef void (*TIMER)(int,void* ) ;
+TIMER timer = 0 ;
+
+typedef void (*ELLLOG)( const char* message , ... ) ;
+ELLLOG Elllog = 0 ;
+
+void RomSendDataToEll ( int* address , int length ) {
+	
+	//	接受由ROM系统层传递过来的函数地址
+	fill_rect = (FILL_RECT ) (address[1]+1) ;
+	timer = (TIMER ) (address[2]+1) ;
+	Elllog = (ELLLOG ) (address[3]+1) ;
+
+}
+
+void draw () {
+	Elllog ( "draw start\r\n" ) ;
+	fill_rect (0,0,200,200,0xff99dd) ;
+	Elllog ( "draw end\r\n" ) ;
+}
+
+void gtkings () {
+	Elllog ( "Ell Layer start\r\n" ) ;
+	//	运行ROM系统层接口
+	//timer ( 100 , (void*)&draw ) ;
+	Elllog ( "Ell Layer end\r\n" ) ;
+}

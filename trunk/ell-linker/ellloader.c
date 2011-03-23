@@ -108,6 +108,9 @@ int EllGetSymbolEntry ( int ell , char* symbol ) {
 	EllDynamicPoolSetCurrent ( ell ) ;
 	address = EllDynamicPoolGetSymbolEntry ( symbol ) ;
 
+	EllLog ( "EllGetSymbolEntry %d\n" , address ) ;
+	EllLog ( "EllGetSymbolEntry %d\n" , EllLinkerMemoryPool.base ) ;
+	
 	if ( -1 != address ) { 
 
 		if ( ELL_THUMB16_ROUTINE == EllLinker.routineset )
