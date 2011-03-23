@@ -1,2 +1,2 @@
-armasm -16 tcc.asm tcc.ell
+armasm --thumb tcc.asm
 pause

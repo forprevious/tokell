@@ -301,6 +301,113 @@ int EllDynamicPoolDestroy () {
 }
 
 # ifdef MTK_ELL
+
+# if 0
+
+char* ell_root = "%c:\\ExeutableLibraryLink\\applications\\%s\\object\\*";
+char* ell_current_directory = 0;
+
+int ell_io_layer_load_all_object_file ( int list , char* application  ) {
+
+	//author: WANG QUANWEI
+	//notes : 取目录中所有文件的绝对路径（WIN32版本）
+	//since : 20090702
+	//(c)MET 
+
+	FS_HANDLE object_file_handle;
+	FS_DOSDirEntry directory_entry;
+ 
+	int long times = 0;
+	int space_length_needs = 0;
+	char* buffer = 0;
+	char* asicbuffer;
+	unsigned short filenamebuffer[120] ;
+
+	char* ell_current_directory_back_up = 0;
+	char* unicode_directorySpecification = 0;
+	unsigned short* directorySpecification = 0;
+ 
+	directorySpecification = (unsigned short*) EllMalloc ( (strlen(ell_root) + 2) * 2 * sizeof(unsigned short) ) ;
+	unicode_directorySpecification = (char*) EllMalloc ( (strlen(ell_root) + 2) * 2 * sizeof(unsigned short) ) ;
+	ell_current_directory_back_up = (char*) EllMalloc ( (strlen(ell_root) + 64) * 2 ) ;
+	ell_current_directory = (char*) EllMalloc ( (strlen(ell_root) + 64) * 2 ) ;
+	buffer = (char*) EllMalloc( (strlen(ell_root) + 2) * 2 ) ;
+	asicbuffer = (char* ) EllMalloc ( 64 );
+	  
+	sprintf(ell_current_directory,ell_root,FS_GetDrive(FS_DRIVE_V_REMOVABLE, 1, FS_NO_ALT_DRIVE),application) ;
+
+	EllLog("ell_current_directory %s",ell_current_directory);
+	//	directorySpecification 用来寻找文件
+	//	directorySpecification  = d:\\ExecutableLibraryLink\\applications\\gtkings\\object\\*
+	strcpy((char*)directorySpecification,ell_current_directory) ;	
+ 
+	EllLog("directorySpecification %s",directorySpecification);
+
+	//	buffer  = d:\\ExecutableLibraryLink\\applications\\gtkings\\object\\%s 
+	strcpy(buffer,ell_current_directory) ;	
+	buffer[strlen(buffer)-1] = '%';
+	buffer[strlen(buffer)] = 's';
+	buffer[strlen(buffer)+1] = 0;
+ 
+	//	ell_current_directory = d:\\ExecutableLibraryLink\\applications\\gtkings\\object\\	
+	ell_current_directory[strlen(ell_current_directory)-1] = 0 ;
+
+	//	全角字符转换
+	EllAsciiToUnicode (unicode_directorySpecification , ell_current_directory ) ;
+	EllWStrcpy ( (signed char*)ell_current_directory , (signed char*)unicode_directorySpecification ) ;
+	EllWStrcpy ( (signed char*)ell_current_directory_back_up , (signed char*)ell_current_directory ) ;
+
+	//	全角字符转换	
+	EllAsciiToUnicode ( unicode_directorySpecification , (char*)directorySpecification ) ;	
+	EllWStrcpy ( (signed char*)directorySpecification , (signed char*)unicode_directorySpecification ) ;
+
+	object_file_handle = FS_FindFirst ( directorySpecification , 0 , 0 , &directory_entry , filenamebuffer , 120 ) ;
+
+	if( 0 > object_file_handle ) {		
+	  FS_Close ( object_file_handle ) ;
+	  return 0; 	  
+	}
+	
+	while( FS_NO_ERROR == FS_FindNext(object_file_handle,&directory_entry,filenamebuffer , 120 ) ) {
+
+		if( !(FS_ATTR_DIR & directory_entry . Attributes) ) {
+
+			EllUnicodeToAscii((char *)asicbuffer,(char *)filenamebuffer); 
+			
+			sprintf(ell_current_directory,buffer,asicbuffer) ; 
+		 
+			EllAsciiToUnicode (unicode_directorySpecification , ell_current_directory ) ;
+			EllWStrcpy ( (signed char*)ell_current_directory , (signed char*)unicode_directorySpecification ) ;	
+	     
+			space_length_needs += ell_memory_space (ell_current_directory) ;
+
+			EXECUTABLE_LIBRARY_add_object( execute_library , ell_current_directory );
+			
+		} 
+	
+	}
+ 
+	FS_Close ( object_file_handle ) ;
+	
+	EllWStrcpy ( (signed char*) ell_current_directory , (signed char*) ell_current_directory_back_up ) ;
+	
+# if 0
+	EllFree ( ell_current_directory_back_up ) ;
+	EllFree ( unicode_directorySpecification ) ;
+	EllFree ( directorySpecification ) ;
+	EllFree ( ell_current_directory ) ;	
+	EllFree ( asicbuffer );
+	EllFree ( buffer ) ;	
+# endif
+
+	return 1;
+
+
+
+}  
+
+# endif
+
 int EllGetAllObjectFileFromDirectory ( int list , char* application ) {
 
 	//	author : Jelo Wang
@@ -312,7 +419,9 @@ int EllGetAllObjectFileFromDirectory ( int list , char* application ) {
 	char path [256] = { 0 } ;
 		
 	EllSlListInsert ( list , (int)"e:\\ell\\ellapp.ell" ) ;
+	EllSlListInsert ( list , (int)"e:\\ell\\rtcall.ell" ) ;
 		
+	counter ++ ;
 	counter ++ ;
 	
 	return counter ;
@@ -709,11 +818,75 @@ int EllElfMapRelocRelaInsert ( Elf32_Rela* reloctab , void* buffer , int* looper
 }
 # endif
 
+char* EllWStrcpy ( signed char* strDestination , const signed char* strSource ) {
+
+	//	author: Jelo Wang
+	//	since : 20110323
+	//	(C) TOK
+ 
+    int count = 1;
+    signed char* temp = strDestination;
+
+    if ( !strSource ) {
+		
+        if ( strDestination ) {
+
+            *(strDestination + count - 1) = '\0';
+            *(strDestination + count) = '\0';
+			
+        }
+		
+        return temp;
+
+    }
+
+    if ( !strDestination || !strSource ) {
+        return 0;
+    }
+	
+    while (!((*(strSource + count) == 0) && (*(strSource + count - 1) == 0))) {
+
+        *(strDestination + count - 1) = *(strSource + count - 1);
+        *(strDestination + count) = *(strSource + count);
+        count += 2;
+		
+    }
+
+    *(strDestination + count - 1) = '\0';
+    *(strDestination + count) = '\0';
+
+    return (char* ) temp;
+	
+}
+
+
+int EllUnicodeToAscii ( unsigned char* pOutBuffer , signed char* pInBuffer ) {
+
+	//	author: Jelo Wang
+	//	since : 20110323
+	//	(C) TOK
+	
+    int count = 0;
+
+    while (!((*pInBuffer == 0) && (*(pInBuffer + 1) == 0))) {
+        *pOutBuffer = *(pInBuffer);
+        pInBuffer += 2;
+        pOutBuffer++;
+        count++;
+    }
+
+    *pOutBuffer = 0;
+	
+    return count;
+	
+}
+
 void EllAsciiToUnicode ( char *outbuffer , char *inbuffer ) {
 
-	//author: Jelo Wang
-	//since : 20090625
-	//(c)MET
+	//	author: Jelo Wang
+	//	since : 20090625
+	//	(C) TOK
+
 	
 	//(1) 参数：输出串 outbuffer unicode
 	//(2) 参数：输入串 inbuffer asiic
@@ -777,39 +950,4 @@ void EllLog ( const char* message , ... ) {
 	return ;
 			
 }
-
-
-/*
-void tok_ell_log ( const char* message , ... ) {
-
-	//author : Jelo Wang
-	//since : 20091210
-
-	static int times = 0 ;
-	static int file = -1 ;
-	unsigned int write = 0 ;
-	unsigned short* path = L"e:\\mmclog.txt";
-
-	char str [1024] ;
-	
-  	va_list args;
-	va_start ( args , message ) ;
-	vsprintf ( str , message , args ) ;
-	va_end (args) ;
-			
-	if ( 0 == times ) {
-		file = FS_Open ( path , FS_CREATE_ALWAYS ) ;
-		times ++ ;  
-	}
-
-	if ( 0 > file ) return ;
-
-	FS_Write ( file , str , strlen(str) , &write ) ;
-
-	return ;
-
-	
-}
-*/
-
 
