@@ -43,7 +43,7 @@ void EllMemoryRegister ( void* buffer , int length ) {
 
 }
 
-int EllInstall ( int routineset , char* application ) {
+int EllInstall ( int routineset , int elltype , char* application ) {
 
 	//	author : Jelo Wang
 	//	notes : load elf files and linking
@@ -62,31 +62,47 @@ int EllInstall ( int routineset , char* application ) {
 	EllLinker.routineset = routineset ;
 	
 	for ( EllSlListSetIterator ( ell->ObjectList , ELLSLSEEK_HEAD ) ; EllSlListIteratorPermit  ( ell->ObjectList ) ; EllSlListIteratorNext ( ell->ObjectList ) ) {
-
+		
 		char* objectpath = (char*) EllSlListIteratorGetElement ( ell->ObjectList ) ;
-	
-		results = EllResolver ( obid , objectpath ) ;
-		
-		if ( 0 == results ) break ;
-		
-		results = EllLocalLinker ( obid , results ) ;
-		
-		if ( 0 == results ) break ;
 
-		obid ++ ;
+		switch ( elltype ) {
+			
+			case ELL_STATIC :
+				results = EllResolver ( obid , objectpath ) ;				
+				if ( 0 == results ) continue ;		
+				results = EllLocalLinkerStatic ( obid , results ) ;				
+				if ( 0 == results ) continue ;					
+				obid ++ ;
+			break ;
+
+			//	dynamic linking
+			case ELL_DYNAMIC :
+				results = EllResolverEx ( obid , objectpath ) ;				
+				if ( 0 == results ) continue ;				
+				results = EllLocalLinker ( obid , results ) ;				
+				if ( 0 == results ) continue ;				
+				obid ++ ;
+			break ;
+
+		}
 		
 	}
 	EllSlListDestroy ( ell->ObjectList ) ;
 
-	//	link all of the object-files
-	EllGlobalLinker ( obid ) ;
-	
-	EllElfMapNolSectDestroy ( EllLinker.obidborder ) ;
-	EllElfMapRelocDestroy ( ell->TextRel.elf32_rel , EllLinker.obidborder ) ;
-	EllElfMapRelocDestroy ( ell->DataRel.elf32_rel , EllLinker.obidborder ) ;
-	EllElfMapRelocRelaDestroy ( ell->TextRela.elf32_rela , EllLinker.obidborder ) ;
-	EllElfMapRelocRelaDestroy ( ell->DataRela.elf32_rela , EllLinker.obidborder ) ;	
-	EllFreeEx ((void**)&ell->ObjectBased) ;
+	//	dynamic linking
+	if ( ELL_DYNAMIC == elltype ) { 
+
+		//	link all of the object-files
+		EllGlobalLinker ( obid ) ;
+		
+		EllElfMapNolSectDestroy ( EllLinker.obidborder ) ;
+		EllElfMapRelocDestroy ( ell->TextRel.elf32_rel , EllLinker.obidborder ) ;
+		EllElfMapRelocDestroy ( ell->DataRel.elf32_rel , EllLinker.obidborder ) ;
+		EllElfMapRelocRelaDestroy ( ell->TextRela.elf32_rela , EllLinker.obidborder ) ;
+		EllElfMapRelocRelaDestroy ( ell->DataRela.elf32_rela , EllLinker.obidborder ) ;	
+		EllFreeEx ((void**)&ell->ObjectBased) ;
+
+	}
 
 	if ( !results ) EllDynamicPoolDestroy () ;
 	
