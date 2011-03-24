@@ -28,6 +28,21 @@
 typedef enum {
 
 	//	author : Jelo Wang
+	//	since : 20110324
+	//	(C)TOK
+
+	//	stataic linking
+	//	load executable ELF
+	ELL_STATIC ,
+	//	dynamic linking
+	//	load relocatable ELF
+	ELL_DYNAMIC,
+
+} ELLTYPE ;
+
+typedef enum {
+
+	//	author : Jelo Wang
 	//	since : 20100626
 	//	(C)TOK
 	
@@ -39,7 +54,7 @@ typedef enum {
 # endif  
 
 extern void EllMemoryRegister ( void* buffer,  int length ) ;
-extern int EllInstall ( int routineset , char* application ) ;
+extern int EllInstall ( int routineset , int elltype , char* application ) ;
 extern int EllGetSymbolEntry ( int ell , char* symbol ) ;
 extern void EllUninstall ( int ell ) ;
 

@@ -23,5 +23,6 @@
 */
 
 
-extern int EllResolver ( int obid , char* path ) ;
+extern int EllResolver( int obid , char* path ) ;
+extern int EllResolverEx ( int obid , char* path ) ;
 

@@ -30,6 +30,67 @@
 ELLLINKER EllLinker = { 0 , ELL_LOCAL_LINKER } ;
 ELLLINKERMEMORYPOOL EllLinkerMemoryPool = { 0 , 0 , 0 } ;
 
+int EllLocalLinkerStatic ( int obid , int file ) {
+
+	//	author : Jelo Wang
+	//	notes : link single object file
+	//	(C)TOK
+
+	int results = 1 ;
+	//	as for why plus 2 here , check out ell.c
+	int looper = 2 ;
+	int lborder = EllElfMapNolSectGetLborder ( obid ) ;
+	int gotsect = 0 ;
+
+	# ifdef ELL_DEBUG	
+		EllLinkerMemoryPool.base = 0 ;
+	# endif
+
+	EllLinker.obidborder = 0 ;
+	EllLinker.status = ELL_LOCAL_LINKER ;
+	
+	//	copy .text , .data , .rodata , .constdata , .bss to EllLinkerMemoryPool
+	for ( looper = 2 ; looper < lborder ; gotsect = 0 , looper ++ ) {
+	
+		Elf32_Shdr* aelf32_shdr = (Elf32_Shdr* )((int)ell->Shdr.elf32_shdr[obid]+looper*sizeof(Elf32_Shdr)) ;
+	
+		if ( SHT_PROGBITS == aelf32_shdr->sh_type ) {
+
+			gotsect = 1 ;
+			
+		} else if ( SHT_NOBITS == aelf32_shdr->sh_type ) {
+		
+			if ( !strcmp ( ".bss" , (char*)aelf32_shdr->sh_name ) ) {	
+				ELL_4BYTES_ALIGN ( EllLinkerMemoryPool.looper ) ;
+				aelf32_shdr->sh_addr = EllLinkerMemoryPool.base + EllLinkerMemoryPool.looper ;
+				//	It's very important informations about section-relocation bellow.
+				//	Use sh_entsize saving the offset of section at EllLinkerMemoryPool		
+				aelf32_shdr->sh_entsize =  EllLinkerMemoryPool.looper ; 	
+				EllLinkerMemoryPool.looper = EllLinkerMemoryPool.looper + aelf32_shdr->sh_size ;
+				continue ;
+
+			} 
+			
+		}
+
+		if ( gotsect ) {
+			ELL_4BYTES_ALIGN ( EllLinkerMemoryPool.looper ) ;
+			//	Absolute address of section 
+			aelf32_shdr->sh_addr = EllLinkerMemoryPool.base + EllLinkerMemoryPool.looper ;
+			//	It's very important informations about section-relocation bellow.
+			//	Use sh_entsize saving the offset of section at EllLinkerMemoryPool		
+			aelf32_shdr->sh_entsize =  EllLinkerMemoryPool.looper ; 					
+			EllHalFileSeek ( file , aelf32_shdr->sh_offset , ELLHAL_SEEK_HEAD ) ;
+			EllHalFileRead ( file , (void* )((int)EllLinkerMemoryPool.pool+EllLinkerMemoryPool.looper) , 1 , aelf32_shdr->sh_size ) ;
+			EllLinkerMemoryPool.looper = EllLinkerMemoryPool.looper + aelf32_shdr->sh_size ;				
+		}
+		
+	}
+
+	return results ;
+
+}
+
 int EllLocalLinker ( int obid , int file ) {
 
 	//	author : Jelo Wang
