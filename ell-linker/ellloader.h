@@ -49,7 +49,7 @@ typedef enum {
 	ELL_ARM32_ROUTINE ,
 	ELL_THUMB16_ROUTINE ,
 
-} ELLROUTINE ;
+} ELLROUTINE ; 
 
 # endif  
 

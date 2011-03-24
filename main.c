@@ -12,7 +12,7 @@ ELLENTRY ellentry = 0 ;
 unsigned char* ebuffer = 0 ;
 int ebufferlength = 1024*4 ;
 
-int main ( int argc , char* argv [] ) {
+ int main ( int argc , char* argv [] ) {
 
 	ebuffer = (unsigned char* ) malloc ( ebufferlength ) ;
 
@@ -28,7 +28,7 @@ int main ( int argc , char* argv [] ) {
 	//	参数1 : 指令集
 	//	参数2 : 应用程序(一个目录，ell以应用程序为单位被加载，
 	//	一个ell应用程序可有n个目标文件构成，ell通过动态连接器将这些目标文件变为可执行)
-	ell  = EllInstall ( ELL_THUMB16_ROUTINE , "GTKINGS" ) ;
+	ell  = EllInstall ( ELL_ARM32_ROUTINE , ELL_STATIC , "GTKINGS" ) ;
 
 	//	取得符号入口(符号类型不仅仅局限在函数，全局变量等也可以访问)
 	ellregister = (ELLREGISTER) EllGetSymbolEntry ( ell , "RomSendDataToEll" ) ;

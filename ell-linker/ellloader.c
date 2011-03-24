@@ -63,14 +63,15 @@ int EllInstall ( int routineset , int elltype , char* application ) {
 	
 	for ( EllSlListSetIterator ( ell->ObjectList , ELLSLSEEK_HEAD ) ; EllSlListIteratorPermit  ( ell->ObjectList ) ; EllSlListIteratorNext ( ell->ObjectList ) ) {
 		
+		int ER_RW_Rel = 0 ;
 		char* objectpath = (char*) EllSlListIteratorGetElement ( ell->ObjectList ) ;
 
 		switch ( elltype ) {
 			
 			case ELL_STATIC :
-				results = EllResolver ( obid , objectpath ) ;				
+				results = EllResolver ( obid , objectpath , &ER_RW_Rel ) ;				
 				if ( 0 == results ) continue ;		
-				results = EllLocalLinkerStatic ( obid , results ) ;				
+				results = EllLocalLinkerStatic ( obid , results , ER_RW_Rel ) ;				
 				if ( 0 == results ) continue ;					
 				obid ++ ;
 			break ;
