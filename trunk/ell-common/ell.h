@@ -31,7 +31,7 @@
 # include <stdio.h> 
 
 //	for MTK system
-# define MTK_ELL
+//# define MTK_ELL
 
 //# define ELL_DEBUG
 

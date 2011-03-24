@@ -23,6 +23,6 @@
 */
 
 
-extern int EllResolver( int obid , char* path ) ;
+extern int EllResolver( int obid , char* path , int* ER_RW_Rel ) ;
 extern int EllResolverEx ( int obid , char* path ) ;
 

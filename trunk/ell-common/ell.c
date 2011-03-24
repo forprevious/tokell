@@ -434,7 +434,7 @@ int EllGetAllObjectFileFromDirectory ( int list , char* application ) {
 
 	char path [256] = { 0 } ;
 		
-	EllSlListInsert ( list , (int)"e:\\ell\\ellapp.ell" ) ;
+	EllSlListInsert ( list , (int)"e:\\ell\\ellapp.esl" ) ;
 		
 	counter ++ ;
 	
@@ -455,7 +455,7 @@ int EllGetAllObjectFileFromDirectory ( int list , char* application ) {
 	HANDLE hDir ;
 
 	char path [256] = { 0 } ;
-	sprintf ( path , "e:\\ell\\%s\\obj\\*.ell" , application ) ;
+	sprintf ( path , "e:\\ell\\%s\\obj\\*.esl" , application ) ;
 
 	hDir = FindFirstFile( path , &finfo ) ;
 	if (hDir == INVALID_HANDLE_VALUE) return 0 ;

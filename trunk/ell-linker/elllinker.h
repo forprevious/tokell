@@ -64,7 +64,7 @@ typedef struct {
 extern ELLLINKER EllLinker ;
 extern ELLLINKERMEMORYPOOL EllLinkerMemoryPool ;
 
-extern int EllLocalLinkerStatic ( int obid , int file ) ;
+extern int EllLocalLinkerStatic ( int obid , int file , int ER_RW_Rel ) ;
 extern int EllLocalLinker ( int obid , int file ) ;
 extern int EllGlobalLinker ( int obidborder ) ;
 

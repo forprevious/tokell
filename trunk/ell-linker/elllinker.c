@@ -30,7 +30,7 @@
 ELLLINKER EllLinker = { 0 , ELL_LOCAL_LINKER } ;
 ELLLINKERMEMORYPOOL EllLinkerMemoryPool = { 0 , 0 , 0 } ;
 
-int EllLocalLinkerStatic ( int obid , int file ) {
+int EllLocalLinkerStatic ( int obid , int file , int ER_RW_Rel ) {
 
 	//	author : Jelo Wang
 	//	notes : link single object file
@@ -41,6 +41,8 @@ int EllLocalLinkerStatic ( int obid , int file ) {
 	int looper = 2 ;
 	int lborder = EllElfMapNolSectGetLborder ( obid ) ;
 	int gotsect = 0 ;
+	
+	Elf32_Shdr* elf32_shdr = { 0 } ;
 
 	# ifdef ELL_DEBUG	
 		EllLinkerMemoryPool.base = 0 ;
@@ -86,6 +88,11 @@ int EllLocalLinkerStatic ( int obid , int file ) {
 		}
 		
 	}
+
+	elf32_shdr = (Elf32_Shdr* )EllElfMapNolSectGet ( obid , "ER_RW" ) ;	
+	gotsect = elf32_shdr->sh_offset + EllLinkerMemoryPool.base ;
+printf("gotsect  %d,%d\n",gotsect ,ER_RW_Rel);	
+	EllMemcpy ( (void* )((int)EllLinkerMemoryPool.pool+ER_RW_Rel) , &gotsect , sizeof(int) ) ;
 
 	return results ;
 
