@@ -435,9 +435,7 @@ int EllGetAllObjectFileFromDirectory ( int list , char* application ) {
 	char path [256] = { 0 } ;
 		
 	EllSlListInsert ( list , (int)"e:\\ell\\ellapp.ell" ) ;
-	EllSlListInsert ( list , (int)"e:\\ell\\rtcall.ell" ) ;
 		
-	counter ++ ;
 	counter ++ ;
 	
 	return counter ;

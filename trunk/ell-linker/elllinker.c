@@ -55,7 +55,8 @@ int EllLocalLinker ( int obid , int file ) {
 		Elf32_Shdr* aelf32_shdr = (Elf32_Shdr* )((int)ell->Shdr.elf32_shdr[obid]+looper*sizeof(Elf32_Shdr)) ;
 	
 		if ( SHT_PROGBITS == aelf32_shdr->sh_type ) {
-			
+
+# if 0			
 			if ( !strcmp ( ".text" , (char*)aelf32_shdr->sh_name ) ) {
 				gotsect = 1 ;
 			} else if ( !strcmp ( ".data" , (char*)aelf32_shdr->sh_name ) ) {
@@ -67,10 +68,13 @@ int EllLocalLinker ( int obid , int file ) {
 			} if ( !strcmp ( "_ell_text" , (char*)aelf32_shdr->sh_name ) ) {
 				gotsect = 1 ;
 			} 
+# endif
+			gotsect = 1 ;
 			
 		} else if ( SHT_NOBITS == aelf32_shdr->sh_type ) {
 		
 			if ( !strcmp ( ".bss" , (char*)aelf32_shdr->sh_name ) ) {	
+				ELL_4BYTES_ALIGN ( EllLinkerMemoryPool.looper ) ;
 				aelf32_shdr->sh_addr = EllLinkerMemoryPool.base + EllLinkerMemoryPool.looper ;
 				//	It's very important informations about section-relocation bellow.
 				//	Use sh_entsize saving the offset of section at EllLinkerMemoryPool		
@@ -83,6 +87,7 @@ int EllLocalLinker ( int obid , int file ) {
 		}
 
 		if ( gotsect ) {
+			ELL_4BYTES_ALIGN ( EllLinkerMemoryPool.looper ) ;
 			//	Absolute address of section 
 			aelf32_shdr->sh_addr = EllLinkerMemoryPool.base + EllLinkerMemoryPool.looper ;
 			//	It's very important informations about section-relocation bellow.
@@ -188,6 +193,8 @@ static int EllReloc ( Elf32_Rel* reloctab , int (*EllRelocKernal) ( Elf32_Rel* e
 				continue ;
 			} 
 
+			EllLog ( "Ell Local Linker Warning -> symbol : '%s' is relocated.\n",elf32_sym->st_name) ;
+			
 		} else if ( ELL_GLOBAL_LINKER == EllLinker.status ) {
 
 			char* name = (char*)elf32_sym->st_name ;

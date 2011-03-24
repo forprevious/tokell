@@ -53,7 +53,7 @@ int main ( int argc , char* argv [] ) {
 //	if ( ellentry ) ellentry () ;
 
 	EllUninstall ( ell ) ;
-	EllHalMemoryLeaked () ;
+	//EllHalMemoryLeaked () ;
 
 	return 1 ;
 

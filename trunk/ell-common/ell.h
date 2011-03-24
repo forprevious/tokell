@@ -31,7 +31,7 @@
 # include <stdio.h> 
 
 //	for MTK system
-//# define MTK_ELL
+# define MTK_ELL
 
 //# define ELL_DEBUG
 
@@ -70,6 +70,9 @@ typedef struct {
 } ELL ;
 
 extern ELL* ell ;
+
+#define ELL_4BYTES_ALIGN(address)\
+	while ( address % 4 ) address ++ ;\
 
 # endif
 

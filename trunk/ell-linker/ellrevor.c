@@ -83,8 +83,15 @@ int EllResolver ( int obid , char* path ) {
 		EllSlGetString ( file , st_offset + elf32_shdr.sh_name , srbuffer ) ;
 
 		if ( SHT_PROGBITS == elf32_shdr.sh_type ) {
-			
-			if ( !strcmp ( ".text" , srbuffer ) ) {			
+
+			if ( !strcmp ( ".data" , srbuffer ) ) {
+				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".data" ) ;
+			} else {
+				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".PROGBITS" ) ;
+			}
+# if 0	
+
+			if ( !strcmp ( ".text" , srbuffer ) ) {
 				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".text" ) ;
 			} else if ( !strcmp ( ".data" , srbuffer ) ) {
 				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".data" ) ;
@@ -95,7 +102,8 @@ int EllResolver ( int obid , char* path ) {
 			} else if ( !strcmp ( "_ell_text" , srbuffer ) ) {
 				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)"_ell_text" ) ;
 			}
-			
+# endif			
+
 		} else if ( SHT_SYMTAB == elf32_shdr.sh_type ) {
 		
 			if ( !strcmp ( ".symtab" , srbuffer ) ) {			
@@ -127,7 +135,7 @@ int EllResolver ( int obid , char* path ) {
 			}
 			
 		}
-		
+
 		sh_offset = sh_offset + elf32_ehdr.e_shentsize ;
 		
 	}
