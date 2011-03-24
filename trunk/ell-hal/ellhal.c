@@ -231,7 +231,7 @@ int EllFree ( void* buffer ) {
 	# endif
 
 # ifdef MTK_ELL
-		EllFREE ( (void**)&buffer ) ;
+		//EllFREE ( (void**)&buffer ) ;
 # else
 		EllFREE ( buffer ) ;
 # endif
@@ -251,7 +251,7 @@ int EllFreeEx ( void** buffer ) {
 	# endif
 
 # ifdef MTK_ELL
-	EllFREE ( buffer ) ;
+	//EllFREE ( buffer ) ;
 # else
 	EllFREE ( *buffer ) ;
 # endif
