@@ -26,7 +26,6 @@
 # include "ellsl.h"
 # include "ellhal.h"
 # include "ellrevor.h"
-# include "ellloader.h"
 # include "elllinker.h"
 
 void EllMemoryRegister ( void* buffer , int length ) {
