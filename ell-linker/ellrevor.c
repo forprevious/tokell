@@ -31,7 +31,7 @@
 
 int text_data_rel = 0 ;
 
-int EllResolver  ( int obid , char* path , int* ER_RW_Rel ) {
+int EllResolver  ( int obid , char* path , int* ER_RO_Rel ) {
 
 	//	author : Jelo Wang
 	//	notes : Resolve elf file
@@ -73,7 +73,7 @@ int EllResolver  ( int obid , char* path , int* ER_RW_Rel ) {
 	if ( !EllElfMapNolSectCreate ( obid , elf32_ehdr.e_shnum ) ) return 0 ;
 	
 	//	see ESLCompiler
-	*ER_RW_Rel = elf32_ehdr.e_entry ;
+	*ER_RO_Rel = elf32_ehdr.e_entry ;
 
 	sh_offset = elf32_ehdr.e_shoff ;
 

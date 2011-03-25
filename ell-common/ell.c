@@ -34,7 +34,7 @@
 
 ELL* ell = 0 ;
 
-int EllDynamicPoolCreate () {
+int EllDynamicPoolCreate ( int elltype , int routineset ) {
 
 	//	author : Jelo Wang
 	//	(C)TOK
@@ -42,6 +42,11 @@ int EllDynamicPoolCreate () {
 	//	notes : Create an Excutable Linked Library
 
 	ELL* nell = (ELL* ) EllMalloc ( sizeof(ELL) ) ;
+
+	if ( !nell ) return 0 ;
+	
+	nell->type = elltype ;
+	nell->set = routineset ;
 	
 	nell->ObjectList = EllSlListCreate () ;
 
@@ -73,8 +78,7 @@ int EllDynamicPoolInsertApplication ( char* application ) {
 
 	obcounter = EllGetAllObjectFileFromDirectory ( ell->ObjectList , application ) ;
 	
-	ell->ObjTotall = obcounter ;
-	
+	ell->ObjTotall = obcounter ;	
 	ell->ObjectBased = (int* ) EllMalloc ( sizeof(int)*ell->ObjTotall ) ;
 	
 	if ( !ell->ObjectBased ) {
@@ -84,26 +88,13 @@ int EllDynamicPoolInsertApplication ( char* application ) {
 
 	ell->Sym.elf32_sym = (Elf32_Sym ** ) EllMalloc ( sizeof(Elf32_Sym*)*obcounter ) ;
 	ell->Shdr.elf32_shdr = (Elf32_Shdr ** ) EllMalloc ( sizeof(Elf32_Shdr*)*obcounter ) ;
+
+	if ( ELL_STATIC == ell->type ) return (int) ell ;
+	
 	ell->TextRel.elf32_rel = (Elf32_Rel ** ) EllMalloc ( sizeof(Elf32_Rel*)*obcounter ) ;
 	ell->DataRel.elf32_rel = (Elf32_Rel ** ) EllMalloc ( sizeof(Elf32_Rel*)*obcounter ) ;
 	ell->TextRela.elf32_rela = (Elf32_Rela ** ) EllMalloc ( sizeof(Elf32_Rela*)*obcounter ) ;
 	ell->DataRela.elf32_rela = (Elf32_Rela ** ) EllMalloc ( sizeof(Elf32_Rela*)*obcounter ) ;
-
-# if 0
-	{
-		int looper = 0 ;
-		for ( looper = 0 ; looper <  obcounter ; looper ++ ) {
-
-			ell->TextRel.elf32_rel[looper] = 0 ;
-			ell->DataRel.elf32_rel[looper] = 0 ;
-			
-			ell->TextRela.elf32_rela[looper] = 0 ;
-			ell->DataRela.elf32_rela[looper] = 0 ;
-			
-		}
-		
-	}
-# endif 
 
 	return (int) ell ;
 		

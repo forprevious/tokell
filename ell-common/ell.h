@@ -35,10 +35,41 @@
 
 //# define ELL_DEBUG
 
+typedef enum {
+
+	//	author : Jelo Wang
+	//	since : 20110324
+	//	(C)TOK
+
+	//	stataic linking
+	//	load executable ELF
+	ELL_STATIC ,
+	//	dynamic linking
+	//	load relocatable ELF
+	ELL_DYNAMIC,
+
+} ELLTYPE ;
+
+typedef enum {
+
+	//	author : Jelo Wang
+	//	since : 20100626
+	//	(C)TOK
+	
+	ELL_ARM32 ,
+	ELL_THUMB16 ,
+
+} ELLROUTINE ; 
+
 typedef struct {
 
 	//	author : Jelo Wang
 
+	//	dynamic or static
+	int type ;
+	//	instruction sets , value between ELL_ARM32_ROUTINE and ELL_THUMB16_ROUTINE
+	int set ;
+	
 	int ObjectList ;
 	int ObjTotall ;
 	int* ObjectBased ;
@@ -76,7 +107,7 @@ extern ELL* ell ;
 
 # endif
 
-extern int EllDynamicPoolCreate () ;
+extern int EllDynamicPoolCreate ( int elltype , int routineset ) ;
 extern void EllDynamicPoolSetCurrent ( int ella ) ;
 extern int EllDynamicPoolInsertApplication ( char* application ) ;
 extern int EllDynamicPoolCreateSymbols ( int obid , int totall ) ;
@@ -104,4 +135,9 @@ extern int EllUnicodeToAscii ( unsigned char* pOutBuffer , signed char* pInBuffe
 extern void EllAsciiToUnicode ( char *outbuffer , char *inbuffer ) ;
 extern void EllDump ( char* path , void* buffer , int length ) ;
 extern void EllLog ( const   char* message , ... ) ;
+
+extern void EllMemoryRegister ( void* buffer,  int length ) ;
+extern int EllInstall ( int routineset , int elltype , char* application ) ;
+extern int EllGetSymbolEntry ( int ell , char* symbol ) ;
+extern void EllUninstall ( int ell ) ;
 
