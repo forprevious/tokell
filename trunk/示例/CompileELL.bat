@@ -1,0 +1,2 @@
+armcc ell.c
+pause
