@@ -31,7 +31,7 @@
 
 int text_data_rel = 0 ;
 
-int EllResolver  ( int obid , char* path , int* ER_RO_Rel ) {
+int EllResolver  ( int obid , char* path , int* ER_RO_RW_Rel , int* ER_RO_ZI_Rel ) {
 
 	//	author : Jelo Wang
 	//	notes : Resolve elf file
@@ -73,8 +73,10 @@ int EllResolver  ( int obid , char* path , int* ER_RO_Rel ) {
 	if ( !EllElfMapNolSectCreate ( obid , elf32_ehdr.e_shnum ) ) return 0 ;
 	
 	//	see ESLCompiler
-	*ER_RO_Rel = elf32_ehdr.e_entry ;
-
+	*ER_RO_RW_Rel = elf32_ehdr.e_entry ;
+	//	see ESLCompiler
+	*ER_RO_ZI_Rel = elf32_ehdr.e_version ;
+	
 	sh_offset = elf32_ehdr.e_shoff ;
 
 	ell->ObjectBased[obid] = EllLinkerMemoryPool.looper ;
@@ -107,9 +109,9 @@ int EllResolver  ( int obid , char* path , int* ER_RO_Rel ) {
 			
 		} else if ( SHT_NOBITS == elf32_shdr.sh_type ) {
 		
-			if ( !strcmp ( ".bss" , srbuffer ) ) {	
-				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".bss" ) ;
-			} 
+			if ( !strcmp ( "ER_ZI" , srbuffer ) ) {	
+				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)"ER_ZI" ) ;
+			}
 			
 		} else if ( SHT_STRTAB == elf32_shdr.sh_type ) {
 		
@@ -223,21 +225,7 @@ int EllResolverEx ( int obid , char* path ) {
 				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".data" ) ;
 			} else {
 				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".PROGBITS" ) ;
-			}
-# if 0	
-
-			if ( !strcmp ( ".text" , srbuffer ) ) {
-				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".text" ) ;
-			} else if ( !strcmp ( ".data" , srbuffer ) ) {
-				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".data" ) ;
-			} else if ( !strcmp ( ".rodata" , srbuffer ) ) {
-				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".rodata" ) ;
-			} else if ( !strcmp ( ".constdata" , srbuffer ) ) {
-				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".constdata" ) ;
-			} else if ( !strcmp ( "_ell_text" , srbuffer ) ) {
-				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)"_ell_text" ) ;
-			}
-# endif			
+			}		
 
 		} else if ( SHT_SYMTAB == elf32_shdr.sh_type ) {
 		

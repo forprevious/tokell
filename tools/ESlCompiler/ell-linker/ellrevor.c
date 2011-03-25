@@ -76,12 +76,7 @@ int EllResolver ( int obid , int file , int file2 ) {
 
 		if ( SHT_PROGBITS == elf32_shdr.sh_type ) {
 
-			if ( !strcmp ( ".data" , srbuffer ) ) {
-				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".data" ) ;
-			} else {
-				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".PROGBITS" ) ;
-			}
-
+			EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".PROGBITS" ) ;
 
 		} else if ( SHT_SYMTAB == elf32_shdr.sh_type ) {
 		
@@ -100,10 +95,8 @@ int EllResolver ( int obid , int file , int file2 ) {
 			}
 
 		} else if ( SHT_NOBITS == elf32_shdr.sh_type ) {
-		
-			if ( !strcmp ( ".bss" , srbuffer ) ) {	
-				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".bss" ) ;
-			} 
+					
+			EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".bss" ) ;	
 			
 		} else if ( SHT_STRTAB == elf32_shdr.sh_type ) {
 		
@@ -117,6 +110,37 @@ int EllResolver ( int obid , int file , int file2 ) {
 
 		sh_offset = sh_offset + elf32_ehdr.e_shentsize ;
 		
+	}
+
+	//	get .strtab offset , and resovle it
+	aelf32_shdr = (Elf32_Shdr* ) EllElfMapNolSectGet ( obid , ".strtab" ) ;
+	if ( 0 == aelf32_shdr ) return 0 ;
+	st_offset = aelf32_shdr->sh_offset ;
+
+	//	get .strtab offset , and resovle it
+	aelf32_shdr = (Elf32_Shdr* ) EllElfMapNolSectGet ( obid , ".symtab" ) ;
+	if ( 0 == aelf32_shdr ) return 0 ;
+	
+	sh_totall = aelf32_shdr->sh_size / aelf32_shdr->sh_entsize ;
+	sh_offset = aelf32_shdr->sh_offset ;
+
+	if ( !EllDynamicPoolCreateSymbols ( obid , sh_totall ) ) {
+		EllHalFileClose ( file ) ;
+		return 0 ;
+	}
+	
+	for ( looper = 0 ; looper < sh_totall ; looper ++ ) {
+
+		Elf32_Sym elf32_sym = {0} ;
+		
+		EllHalFileSeek ( file , sh_offset , ELLHAL_SEEK_HEAD ) ;
+		EllHalFileRead ( file , &elf32_sym , sizeof(Elf32_Sym) , 1 ) ;
+		EllSlGetString ( file , st_offset + elf32_sym.st_name , srbuffer ) ;
+		
+		EllDynamicPoolInsertSymbol ( obid , (void*)&elf32_sym , srbuffer , looper ) ;
+
+		sh_offset = sh_offset + aelf32_shdr->sh_entsize ;
+			
 	}
 
 	//	get .rel.text reloctab
@@ -136,14 +160,28 @@ int EllResolver ( int obid , int file , int file2 ) {
 			
 			if ( R_ARM_ABS32 == ELF32_R_TYPE(elf32_rel.r_info) ) {
 				
-				//	.text段中的重定位入口偏移量写到elf32_ehdr.
+				Elf32_Sym* elf32_sym = EllDynamicPoolLocalGetSymbol ( obid , ELF32_R_SYM(elf32_rel.r_info) ) ;
+				Elf32_Shdr* elf32_shdr = (Elf32_Shdr* ) EllElfMapNolSectGetWithIndex ( obid , elf32_sym->st_shndx ) ;
+				
+				elf32_ehdr.e_entry = 0 ;
+				elf32_ehdr.e_version = 0 ;
+
+				//	.data
+				if ( SHT_PROGBITS == elf32_shdr->sh_type ) {
+				
+					//	RW段在.text段中的重定位入口偏移量写到elf32_ehdr.e_version
+					elf32_ehdr.e_entry = elf32_rel.r_offset ;			
+
+				} else if ( SHT_NOBITS == elf32_shdr->sh_type ) {
+					//	.bss
+					//	ZI段在.text段中的重定位入口偏移量写到elf32_ehdr.e_version
+					elf32_ehdr.e_version = elf32_rel.r_offset ;			
+				}
+				
 				EllHalFileSeek ( file2 , 0 , ELLHAL_SEEK_HEAD ) ;			
 				EllHalFileRead ( file2 , &elf32_ehdr , sizeof(Elf32_Ehdr) , 1 ) ;
-				elf32_ehdr.e_entry = elf32_rel.r_offset ;			
 				EllHalFileSeek ( file2 , 0 , ELLHAL_SEEK_HEAD ) ;			
-				EllHalFileWrite ( file2 , &elf32_ehdr , sizeof(Elf32_Ehdr) , 1 ) ;
-				
-				return file ;
+				EllHalFileWrite ( file2 , &elf32_ehdr , sizeof(Elf32_Ehdr) , 1 ) ;						
 				
 			}
 
