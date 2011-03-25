@@ -29,8 +29,6 @@
 # include "ellrevor.h"
 # include "elllinker.h"
 
-int text_data_rel = 0 ;
-
 int EllResolver  ( int obid , char* path , int* ER_RO_RW_Rel , int* ER_RO_ZI_Rel ) {
 
 	//	author : Jelo Wang
@@ -99,7 +97,7 @@ int EllResolver  ( int obid , char* path , int* ER_RO_RW_Rel , int* ER_RO_ZI_Rel
 				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)"ER_RW" ) ;
 			} else {
 				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".PROGBITS" ) ;
-			}	
+			}
 
 		} else if ( SHT_SYMTAB == elf32_shdr.sh_type ) {
 		
