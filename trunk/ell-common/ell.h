@@ -31,7 +31,9 @@
 # include <stdio.h> 
 
 //	for MTK system
-//# define MTK_ELL
+# ifndef WIN32
+# define MTK_ELL
+# endif
 
 //# define ELL_DEBUG
 
