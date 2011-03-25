@@ -63,10 +63,9 @@ int EllLocalLinkerStatic ( int obid , int file , int ER_RO_RW_Rel , int ER_RO_ZI
 		} else if ( SHT_NOBITS == aelf32_shdr->sh_type ) {
 		
 			ELL_4BYTES_ALIGN ( EllLinkerMemoryPool.looper ) ;
-			aelf32_shdr->sh_addr = EllLinkerMemoryPool.base + EllLinkerMemoryPool.looper ;
-			//	It's very important informations about section-relocation bellow.
-			//	Use sh_entsize saving the offset of section at EllLinkerMemoryPool		
-			aelf32_shdr->sh_entsize =  EllLinkerMemoryPool.looper ; 	
+
+			aelf32_shdr->sh_offset = EllLinkerMemoryPool.looper ;
+
 			EllLinkerMemoryPool.looper = EllLinkerMemoryPool.looper + aelf32_shdr->sh_size ;
 			
 			gotsect = 0 ;
@@ -74,15 +73,15 @@ int EllLocalLinkerStatic ( int obid , int file , int ER_RO_RW_Rel , int ER_RO_ZI
 		}
 
 		if ( gotsect ) {
+
 			ELL_4BYTES_ALIGN ( EllLinkerMemoryPool.looper ) ;
-			//	Absolute address of section 
-			aelf32_shdr->sh_addr = EllLinkerMemoryPool.base + EllLinkerMemoryPool.looper ;
-			//	It's very important informations about section-relocation bellow.
-			//	Use sh_entsize saving the offset of section at EllLinkerMemoryPool		
-			aelf32_shdr->sh_entsize =  EllLinkerMemoryPool.looper ; 					
+		
 			EllHalFileSeek ( file , aelf32_shdr->sh_offset , ELLHAL_SEEK_HEAD ) ;
 			EllHalFileRead ( file , (void* )((int)EllLinkerMemoryPool.pool+EllLinkerMemoryPool.looper) , 1 , aelf32_shdr->sh_size ) ;
+			
+			aelf32_shdr->sh_offset = EllLinkerMemoryPool.looper ;
 			EllLinkerMemoryPool.looper = EllLinkerMemoryPool.looper + aelf32_shdr->sh_size ;				
+		
 		}
 		
 	}
