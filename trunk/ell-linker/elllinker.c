@@ -62,16 +62,14 @@ int EllLocalLinkerStatic ( int obid , int file , int ER_RO_RW_Rel , int ER_RO_ZI
 			
 		} else if ( SHT_NOBITS == aelf32_shdr->sh_type ) {
 		
-			if ( !strcmp ( ".bss" , (char*)aelf32_shdr->sh_name ) ) {	
-				ELL_4BYTES_ALIGN ( EllLinkerMemoryPool.looper ) ;
-				aelf32_shdr->sh_addr = EllLinkerMemoryPool.base + EllLinkerMemoryPool.looper ;
-				//	It's very important informations about section-relocation bellow.
-				//	Use sh_entsize saving the offset of section at EllLinkerMemoryPool		
-				aelf32_shdr->sh_entsize =  EllLinkerMemoryPool.looper ; 	
-				EllLinkerMemoryPool.looper = EllLinkerMemoryPool.looper + aelf32_shdr->sh_size ;
-				continue ;
-
-			} 
+			ELL_4BYTES_ALIGN ( EllLinkerMemoryPool.looper ) ;
+			aelf32_shdr->sh_addr = EllLinkerMemoryPool.base + EllLinkerMemoryPool.looper ;
+			//	It's very important informations about section-relocation bellow.
+			//	Use sh_entsize saving the offset of section at EllLinkerMemoryPool		
+			aelf32_shdr->sh_entsize =  EllLinkerMemoryPool.looper ; 	
+			EllLinkerMemoryPool.looper = EllLinkerMemoryPool.looper + aelf32_shdr->sh_size ;
+			
+			gotsect = 0 ;
 			
 		}
 
