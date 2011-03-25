@@ -147,7 +147,7 @@ void EllUninstall ( int ell ) {
 	//	author : Jelo Wang
 	//	(C)TOK
 
-	if ( !ell ) return 0 ;
+	if ( !ell ) return ;
 
 	EllDynamicPoolSetCurrent ( ell ) ;
 	EllDynamicPoolDestroy () ;
