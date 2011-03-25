@@ -73,7 +73,8 @@ int EllResolver  ( int obid , char* path , int* ER_RO_RW_Rel , int* ER_RO_ZI_Rel
 	//	see ESLCompiler
 	*ER_RO_RW_Rel = elf32_ehdr.e_entry ;
 	//	see ESLCompiler
-	if ( 1 != elf32_ehdr.e_version ) *ER_RO_ZI_Rel = elf32_ehdr.e_version ;
+	if ( EV_CURRENT != elf32_ehdr.e_version && EV_NUM != elf32_ehdr.e_version ) 
+		*ER_RO_ZI_Rel = elf32_ehdr.e_version ;
 	
 	sh_offset = elf32_ehdr.e_shoff ;
 
