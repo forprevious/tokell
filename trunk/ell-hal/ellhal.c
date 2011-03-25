@@ -41,7 +41,7 @@
 	# define EllFREE free
 # endif
 
-//# define MEMORY_MONITOR_ENABLE
+# define MEMORY_MONITOR_ENABLE
 # ifdef MEMORY_MONITOR_ENABLE
 MEMORY_MONITOR mem_monitor = { 0 , 0 , 0 , 0 , 0 , 0 } ;
 int MemoryMonitorInit ( MEMORY_MONITOR* mem_monitor ) {

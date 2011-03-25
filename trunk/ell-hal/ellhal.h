@@ -25,6 +25,13 @@
 # ifndef __ELLHAL
 # define __ELLHAL
 
+# ifdef WIN32
+# include <assert.h>
+# endif
+
+# undef ASSERT
+# define ASSERT assert
+
 typedef enum {
 
 	//	author : Jelo Wang

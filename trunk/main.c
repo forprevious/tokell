@@ -1,7 +1,7 @@
 
-# include "ellloader.h"
+# include "ell.h"
 
-static int ell = 0 ;
+static int elllibrary = 0 ;
 
 typedef void (*ELLREGISTER ) ( int* address , int length ) ;
 ELLREGISTER ellregister = 0 ;
@@ -28,11 +28,11 @@ int ebufferlength = 1024*4 ;
 	//	参数1 : 指令集
 	//	参数2 : 应用程序(一个目录，ell以应用程序为单位被加载，
 	//	一个ell应用程序可有n个目标文件构成，ell通过动态连接器将这些目标文件变为可执行)
-	ell  = EllInstall ( ELL_ARM32_ROUTINE , ELL_STATIC , "GTKINGS" ) ;
-
+	elllibrary  = EllInstall ( ELL_ARM32 , ELL_STATIC , "GTKINGS" ) ;
+	
 	//	取得符号入口(符号类型不仅仅局限在函数，全局变量等也可以访问)
-	ellregister = (ELLREGISTER) EllGetSymbolEntry ( ell , "RomSendDataToEll" ) ;
-	ellentry = (ELLENTRY) EllGetSymbolEntry ( ell  , "gtkings" ) ;
+	ellregister = (ELLREGISTER) EllGetSymbolEntry ( elllibrary , "RomSendDataToEll" ) ;
+	ellentry = (ELLENTRY) EllGetSymbolEntry ( elllibrary  , "gtkings" ) ;
 
 	EllLog ( "ell register %x\n" , ellregister ) ;
 	EllLog ( "ell entry %x\n" , ellentry ) ;
@@ -52,7 +52,7 @@ int ebufferlength = 1024*4 ;
 	
 //	if ( ellentry ) ellentry () ;
 
-	EllUninstall ( ell ) ;
+	EllUninstall ( elllibrary ) ;
 	//EllHalMemoryLeaked () ;
 
 	return 1 ;
