@@ -162,7 +162,10 @@ int EllResolver ( int obid , int file , int file2 ) {
 				
 				Elf32_Sym* elf32_sym = EllDynamicPoolLocalGetSymbol ( obid , ELF32_R_SYM(elf32_rel.r_info) ) ;
 				Elf32_Shdr* elf32_shdr = (Elf32_Shdr* ) EllElfMapNolSectGetWithIndex ( obid , elf32_sym->st_shndx ) ;
-				
+
+				EllHalFileSeek ( file2 , 0 , ELLHAL_SEEK_HEAD ) ;			
+				EllHalFileRead ( file2 , &elf32_ehdr , sizeof(Elf32_Ehdr) , 1 ) ;
+
 				elf32_ehdr.e_entry = 0 ;
 				elf32_ehdr.e_version = 0 ;
 
@@ -178,8 +181,6 @@ int EllResolver ( int obid , int file , int file2 ) {
 					elf32_ehdr.e_version = elf32_rel.r_offset ;			
 				}
 				
-				EllHalFileSeek ( file2 , 0 , ELLHAL_SEEK_HEAD ) ;			
-				EllHalFileRead ( file2 , &elf32_ehdr , sizeof(Elf32_Ehdr) , 1 ) ;
 				EllHalFileSeek ( file2 , 0 , ELLHAL_SEEK_HEAD ) ;			
 				EllHalFileWrite ( file2 , &elf32_ehdr , sizeof(Elf32_Ehdr) , 1 ) ;						
 				
