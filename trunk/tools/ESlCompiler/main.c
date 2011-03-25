@@ -4,8 +4,8 @@
 # include "ellhal.h"
 # include "ellloader.h"
 
-//char file1 [ 256 ] = { "G:\\workspace\\ell\\tools\\ESlCompiler\\Debug\\test.o" } ;
-//char file2 [ 256 ] = { "G:\\workspace\\ell\\tools\\ESlCompiler\\Debug\\__image.axf" } ;
+//char file1 [ 256 ] = { 0 } ;
+//char file2 [ 256 ] = { 0 } ;
 char file1 [ 256 ] = { 0 } ;
 char file2 [ 256 ] = { 0 } ;
 
@@ -43,7 +43,6 @@ int main ( int argc , char* argv [] ) {
 	int outfile = 0 ;
 	int fileoffset = 0 ;
 	
-
 	if ( !argc || argc < 2 ) {
 
 		help () ;
