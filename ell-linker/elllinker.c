@@ -96,7 +96,7 @@ int EllLocalLinkerStatic ( int obid , int file , int ER_RO_RW_Rel , int ER_RO_ZI
 	if ( ER_RO_ZI_Rel ) {
 		elf32_shdr = (Elf32_Shdr* )EllElfMapNolSectGet ( obid , "ER_ZI" ) ; 
 		gotsect = elf32_shdr->sh_offset + EllLinkerMemoryPool.base ;
-		EllMemcpy ( (void* )((int)EllLinkerMemoryPool.pool+ER_RO_RW_Rel) , &gotsect , sizeof(int) ) ;	
+		EllMemcpy ( (void* )((int)EllLinkerMemoryPool.pool+ER_RO_ZI_Rel) , &gotsect , sizeof(int) ) ;	
 	}
 
 	EllHalFileClose ( file ) ;
