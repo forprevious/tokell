@@ -166,8 +166,8 @@ int EllResolver ( int obid , int file , int file2 ) {
 				EllHalFileSeek ( file2 , 0 , ELLHAL_SEEK_HEAD ) ;			
 				EllHalFileRead ( file2 , &elf32_ehdr , sizeof(Elf32_Ehdr) , 1 ) ;
 
-				elf32_ehdr.e_entry = 0 ;
-				elf32_ehdr.e_version = 0 ;
+				if ( EV_CURRENT == elf32_ehdr.e_version || EV_NUM == elf32_ehdr.e_version ) 
+					elf32_ehdr.e_version = 0 ;
 
 				//	.data
 				if ( SHT_PROGBITS == elf32_shdr->sh_type ) {
