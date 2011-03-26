@@ -30,7 +30,7 @@
 ELLLINKER EllLinker = { 0 , 0 } ;
 ELLLINKERMEMORYPOOL EllLinkerMemoryPool = { 0 , 0 , 0 } ;
 
-int EllLocalLinkerStatic ( int obid , int file , int ER_RO_RW_Rel , int ER_RO_ZI_Rel ) {
+int EllLocalLinker ( int obid , int file , int ER_RO_RW_Rel , int ER_RO_ZI_Rel ) {
 
 	//	author : Jelo Wang
 	//	notes : link single object file
@@ -65,17 +65,14 @@ int EllLocalLinkerStatic ( int obid , int file , int ER_RO_RW_Rel , int ER_RO_ZI
 			ELL_4BYTES_ALIGN ( EllLinkerMemoryPool.looper ) ;
 
 			aelf32_shdr->sh_offset = EllLinkerMemoryPool.looper ;
-
-			EllLinkerMemoryPool.looper = EllLinkerMemoryPool.looper + aelf32_shdr->sh_size ;
-			
+			EllLinkerMemoryPool.looper = EllLinkerMemoryPool.looper + aelf32_shdr->sh_size ;			
 			gotsect = 0 ;
 			
 		}
 
 		if ( gotsect ) {
 
-			ELL_4BYTES_ALIGN ( EllLinkerMemoryPool.looper ) ;
-		
+			ELL_4BYTES_ALIGN ( EllLinkerMemoryPool.looper ) ;		
 			EllHalFileSeek ( file , aelf32_shdr->sh_offset , ELLHAL_SEEK_HEAD ) ;
 			EllHalFileRead ( file , (void* )((int)EllLinkerMemoryPool.pool+EllLinkerMemoryPool.looper) , 1 , aelf32_shdr->sh_size ) ;
 			
@@ -87,15 +84,19 @@ int EllLocalLinkerStatic ( int obid , int file , int ER_RO_RW_Rel , int ER_RO_ZI
 	}
 
 	if ( ER_RO_RW_Rel ) {
+		
 		elf32_shdr = (Elf32_Shdr* )EllElfMapNolSectGet ( obid , "ER_RW" ) ; 
 		gotsect = elf32_shdr->sh_offset + EllLinkerMemoryPool.base ;
 		EllMemcpy ( (void* )((int)EllLinkerMemoryPool.pool+ER_RO_RW_Rel) , &gotsect , sizeof(int) ) ;	
+		
 	}
 	
 	if ( ER_RO_ZI_Rel ) {
+		
 		elf32_shdr = (Elf32_Shdr* )EllElfMapNolSectGet ( obid , "ER_ZI" ) ; 
 		gotsect = elf32_shdr->sh_offset + EllLinkerMemoryPool.base ;
-		EllMemcpy ( (void* )((int)EllLinkerMemoryPool.pool+ER_RO_ZI_Rel) , &gotsect , sizeof(int) ) ;	
+		EllMemcpy ( (void* )((int)EllLinkerMemoryPool.pool+ER_RO_ZI_Rel) , &gotsect , sizeof(int) ) ;
+		
 	}
 
 	EllHalFileClose ( file ) ;
@@ -104,7 +105,7 @@ int EllLocalLinkerStatic ( int obid , int file , int ER_RO_RW_Rel , int ER_RO_ZI
 
 }
 
-int EllLocalLinker ( int obid , int file ) {
+int EllLocalLinkerEx ( int obid , int file ) {
 
 	//	author : Jelo Wang
 	//	notes : link single object file
@@ -130,19 +131,6 @@ int EllLocalLinker ( int obid , int file ) {
 	
 		if ( SHT_PROGBITS == aelf32_shdr->sh_type ) {
 
-# if 0			
-			if ( !strcmp ( ".text" , (char*)aelf32_shdr->sh_name ) ) {
-				gotsect = 1 ;
-			} else if ( !strcmp ( ".data" , (char*)aelf32_shdr->sh_name ) ) {
-				gotsect = 1 ;
-			} else if ( !strcmp ( ".rodata" , (char*)aelf32_shdr->sh_name ) ) {
-				gotsect = 1 ;
-			} else if ( !strcmp ( ".constdata" , (char*)aelf32_shdr->sh_name ) ) {
-				gotsect = 1 ;
-			} if ( !strcmp ( "_ell_text" , (char*)aelf32_shdr->sh_name ) ) {
-				gotsect = 1 ;
-			} 
-# endif
 			gotsect = 1 ;
 			
 		} else if ( SHT_NOBITS == aelf32_shdr->sh_type ) {

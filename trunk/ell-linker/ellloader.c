@@ -69,7 +69,7 @@ int EllInstall ( int routineset , int elltype , char* application ) {
 			case ELL_STATIC :
 				results = EllResolver ( obid , objectpath , &ER_RO_RW_Rel , &ER_RO_ZI_Rel ) ;				
 				if ( 0 == results ) continue ;		
-				results = EllLocalLinkerStatic ( obid , results , ER_RO_RW_Rel , ER_RO_ZI_Rel ) ;				
+				results = EllLocalLinker ( obid , results , ER_RO_RW_Rel , ER_RO_ZI_Rel ) ;				
 				if ( 0 == results ) continue ;
 				obid ++ ;
 			break ;
@@ -78,7 +78,7 @@ int EllInstall ( int routineset , int elltype , char* application ) {
 			case ELL_DYNAMIC :
 				results = EllResolverEx ( obid , objectpath ) ;				
 				if ( 0 == results ) continue ;				
-				results = EllLocalLinker ( obid , results ) ;				
+				results = EllLocalLinkerEx ( obid , results ) ;				
 				if ( 0 == results ) continue ;				
 				obid ++ ;
 			break ;
