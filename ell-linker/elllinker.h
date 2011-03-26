@@ -63,8 +63,8 @@ typedef struct {
 extern ELLLINKER EllLinker ;
 extern ELLLINKERMEMORYPOOL EllLinkerMemoryPool ;
 
-extern int EllLocalLinkerStatic ( int obid , int file , int ER_RO_RW_Rel , int ER_RO_ZI_Rel ) ;
-extern int EllLocalLinker ( int obid , int file ) ;
+extern int EllLocalLinker ( int obid , int file , int ER_RO_RW_Rel , int ER_RO_ZI_Rel ) ;
+extern int EllLocalLinkerEx ( int obid , int file ) ;
 extern int EllGlobalLinker ( int obidborder ) ;
 
 static int EllReloc ( Elf32_Rel* reloctab , int (*EllRelocKernal) (Elf32_Rel*,Elf32_Sym*, int) , int looper , int lborder , int obid ) ;
