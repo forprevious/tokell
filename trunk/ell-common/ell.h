@@ -1,7 +1,7 @@
 
 /*
 
-+	Executable Linking-Library 1.0.1.
++	Executable Linking-Library 1.0.0.
 +	Architecture : ARMv6
 
 +	'Executable Linking-Library' is a Dynamic Linking solution for closed runing environment.
@@ -31,49 +31,33 @@
 # include <stdio.h> 
 
 //	for MTK system
-# ifndef WIN32
-# define MTK_ELL
-# endif
+//	# define MTK_ELL
 
 //# define ELL_DEBUG
 
 typedef enum {
 
 	//	author : Jelo Wang
-	//	since : 20110324
-	//	(C)TOK
+	//	since : 2011-07-08
+	//	(C) TOK
 
-	//	stataic linking
-	//	load executable ELF
-	ELL_STATIC ,
-	//	dynamic linking
-	//	load relocatable ELF
-	ELL_DYNAMIC,
+	//	text.rel
+	//	data.rel
 
-} ELLTYPE ;
+	ELL_REL_SECT_TEXT = 0 ,
+	ELL_REL_SECT_DATA ,
+	ELL_REL_SECT_CONSTDATA ,
 
-typedef enum {
-
-	//	author : Jelo Wang
-	//	since : 20100626
-	//	(C)TOK
-	
-	ELL_ARM32 ,
-	ELL_THUMB16 ,
-
-} ELLROUTINE ; 
+} ELLRELSEC ;
 
 typedef struct {
 
 	//	author : Jelo Wang
 
-	//	dynamic or static
-	int type ;
-	//	instruction sets , value between ELL_ARM32_ROUTINE and ELL_THUMB16_ROUTINE
-	int set ;
-	
 	int ObjectList ;
 	int ObjTotall ;
+
+	//	the based offset of each ell obj
 	int* ObjectBased ;
 
 	struct {
@@ -93,6 +77,10 @@ typedef struct {
 	} DataRel ;
 
 	struct {
+		Elf32_Rel** elf32_rel ;
+	} ConstRel ;
+
+	struct {
 		Elf32_Rela** elf32_rela ;
 	} TextRela ;
 	
@@ -109,7 +97,7 @@ extern ELL* ell ;
 
 # endif
 
-extern int EllDynamicPoolCreate ( int elltype , int routineset ) ;
+extern int EllDynamicPoolCreate () ;
 extern void EllDynamicPoolSetCurrent ( int ella ) ;
 extern int EllDynamicPoolInsertApplication ( char* application ) ;
 extern int EllDynamicPoolCreateSymbols ( int obid , int totall ) ;
@@ -127,19 +115,14 @@ extern int EllElfMapNolSectGet ( int obid , char* name ) ;
 extern int EllElfMapNolSectGetWithIndex ( int obid , int index ) ;
 extern int EllElfMapNolSectGetLborder ( int obid ) ;
 extern void EllElfMapNolSectDestroy ( int obidborder ) ;
-extern int EllElfMapRelocRelCreate ( Elf32_Rel** elf32_rel , int obid , int totall ) ;
-extern int EllElfMapRelocRelInsert ( Elf32_Rel** elf32_rel , int obid , void* buffer ) ;
-extern int EllElfMapRelocGetLborder ( Elf32_Rel** elf32_rel , int obid ) ; 
-extern void EllElfMapRelocDestroy ( Elf32_Rel** elf32_rel , int obidborder ) ;
+extern int EllElfMapRelocRelCreate ( ELLRELSEC relsec , int obid , int totall ) ;
+extern int EllElfMapRelocRelInsert ( ELLRELSEC relsec , int obid , void* buffer ) ;
+extern int EllElfMapRelocGetLborder ( ELLRELSEC relsec , int obid ) ; 
+extern void EllElfMapRelocDestroy ( ELLRELSEC relsec , int obidborder ) ;
 extern void EllElfMapRelocRelaDestroy ( Elf32_Rela** elf32_rela , int obidborder ) ;
 extern char* EllWStrcpy ( signed char* strDestination , const signed char* strSource ) ;
 extern int EllUnicodeToAscii ( unsigned char* pOutBuffer , signed char* pInBuffer ) ;
 extern void EllAsciiToUnicode ( char *outbuffer , char *inbuffer ) ;
 extern void EllDump ( char* path , void* buffer , int length ) ;
 extern void EllLog ( const   char* message , ... ) ;
-
-extern void EllMemoryRegister ( void* buffer,  int length ) ;
-extern int EllInstall ( int routineset , int elltype , char* application ) ;
-extern int EllGetSymbolEntry ( int ell , char* symbol ) ;
-extern void EllUninstall ( int ell ) ;
 

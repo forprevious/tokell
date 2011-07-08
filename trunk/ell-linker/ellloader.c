@@ -1,7 +1,7 @@
 
 /*
 
-+	Executable Linking-Library 1.0.1.
++	Executable Linking-Library 1.0.0.
 +	Architecture : ARMv6
 
 +	'Executable Linking-Library' is a Dynamic Linking solution for closed runing environment.
@@ -26,6 +26,7 @@
 # include "ellsl.h"
 # include "ellhal.h"
 # include "ellrevor.h"
+# include "ellloader.h"
 # include "elllinker.h"
 
 void EllMemoryRegister ( void* buffer , int length ) {
@@ -42,7 +43,7 @@ void EllMemoryRegister ( void* buffer , int length ) {
 
 }
 
-int EllInstall ( int routineset , int elltype , char* application ) {
+int EllInstall ( int routineset , char* application ) {
 
 	//	author : Jelo Wang
 	//	notes : load elf files and linking
@@ -52,60 +53,47 @@ int EllInstall ( int routineset , int elltype , char* application ) {
 	int walker = 0 ;
 	int results = 1 ;
 
-	ELL* ell = (ELL* )EllDynamicPoolCreate ( elltype , routineset ) ;
+	ELL* ell = (ELL* )EllDynamicPoolCreate () ;
 	EllDynamicPoolSetCurrent ( (int)ell ) ;
 	if ( !EllDynamicPoolInsertApplication ( application ) ) return 0 ;
 
 	EllLog ( "EllInstall start\n" ) ;
-		
+	
+	EllLinker.routineset = routineset ;
+	
 	for ( EllSlListSetIterator ( ell->ObjectList , ELLSLSEEK_HEAD ) ; EllSlListIteratorPermit  ( ell->ObjectList ) ; EllSlListIteratorNext ( ell->ObjectList ) ) {
-		
-		int ER_RO_RW_Rel = 0 ;
-		int ER_RO_ZI_Rel = 0 ;
+
 		char* objectpath = (char*) EllSlListIteratorGetElement ( ell->ObjectList ) ;
+	
+		results = EllResolver ( obid , objectpath ) ;
+		
+		if ( 0 == results ) break ;
+		
+		results = EllLocalLinker ( obid , results ) ;
+		
+		if ( 0 == results ) break ;
 
-		switch ( ell->type ) {
-			
-			case ELL_STATIC :
-				results = EllResolver ( obid , objectpath , &ER_RO_RW_Rel , &ER_RO_ZI_Rel ) ;				
-				if ( 0 == results ) continue ;		
-				results = EllLocalLinker ( obid , results , ER_RO_RW_Rel , ER_RO_ZI_Rel ) ;				
-				if ( 0 == results ) continue ;
-				obid ++ ;
-			break ;
-
-			//	dynamic linking
-			case ELL_DYNAMIC :
-				results = EllResolverEx ( obid , objectpath ) ;				
-				if ( 0 == results ) continue ;				
-				results = EllLocalLinkerEx ( obid , results ) ;				
-				if ( 0 == results ) continue ;				
-				obid ++ ;
-			break ;
-
-		}
+		obid ++ ;
 		
 	}
+
 	EllSlListDestroy ( ell->ObjectList ) ;
 
-	//	dynamic linking
-	if ( ELL_DYNAMIC == ell->type ) { 
-
-		//	link all of the object-files
-		EllGlobalLinker ( obid ) ;
-			
-		EllElfMapRelocDestroy ( ell->TextRel.elf32_rel , EllLinker.obidborder ) ;
-		EllElfMapRelocDestroy ( ell->DataRel.elf32_rel , EllLinker.obidborder ) ;
-		EllElfMapRelocRelaDestroy ( ell->TextRela.elf32_rela , EllLinker.obidborder ) ;
-		EllElfMapRelocRelaDestroy ( ell->DataRela.elf32_rela , EllLinker.obidborder ) ;	
-
-	}
+	//	link all of the object-files
+	EllGlobalLinker ( obid ) ;
+	
 	EllElfMapNolSectDestroy ( EllLinker.obidborder ) ;
+	EllElfMapRelocDestroy ( ELL_REL_SECT_TEXT , EllLinker.obidborder ) ;
+	EllElfMapRelocDestroy ( ELL_REL_SECT_DATA , EllLinker.obidborder ) ;
+	EllElfMapRelocDestroy ( ELL_REL_SECT_CONSTDATA , EllLinker.obidborder ) ;
+//	EllElfMapRelocRelaDestroy ( ell->TextRela.elf32_rela , EllLinker.obidborder ) ;
+//	EllElfMapRelocRelaDestroy ( ell->DataRela.elf32_rela , EllLinker.obidborder ) ;	
 	EllFreeEx ((void**)&ell->ObjectBased) ;
 
 	if ( !results ) EllDynamicPoolDestroy () ;
 	
 	EllDump ( "e:\\ellmem.elle" , (void*)EllLinkerMemoryPool.pool , EllLinkerMemoryPool.looper ) ;
+
 	EllLog ( "EllInstall end\n" ) ;
 	
 	return (int)ell ;
@@ -121,8 +109,6 @@ int EllGetSymbolEntry ( int ell , char* symbol ) {
 	
 	int address = 0 ;
 
-	if ( !ell ) return 0 ;
-	
 	EllDynamicPoolSetCurrent ( ell ) ;
 	address = EllDynamicPoolGetSymbolEntry ( symbol ) ;
 
@@ -131,9 +117,9 @@ int EllGetSymbolEntry ( int ell , char* symbol ) {
 	
 	if ( -1 != address ) { 
 
-		if ( ELL_THUMB16 == ((ELL*)ell)->set )
+		if ( ELL_THUMB16_ROUTINE == EllLinker.routineset )
 			address = address + EllLinkerMemoryPool.base + 1 ;
-		else if ( ELL_ARM32 == ((ELL*)ell)->set )
+		else if ( ELL_ARM32_ROUTINE == EllLinker.routineset )
 			address = address + EllLinkerMemoryPool.base ;
 		
 		return address ;
@@ -146,8 +132,6 @@ void EllUninstall ( int ell ) {
 
 	//	author : Jelo Wang
 	//	(C)TOK
-
-	if ( !ell ) return ;
 
 	EllDynamicPoolSetCurrent ( ell ) ;
 	EllDynamicPoolDestroy () ;
