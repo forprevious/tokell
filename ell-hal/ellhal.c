@@ -35,45 +35,65 @@
 	extern void *med_alloc_ext_mem_ext ( int size , char* file_p , long line_p ) ;
 	extern void med_free_ext_mem_ext ( void **pointer , char* file_p , long line_p ) ;
 	# define EllMALLOC(size) med_alloc_ext_mem_ext(size,__FILE__,__LINE__)
-	# define EllFREE(buffer) med_free_ext_mem_ext(buffer,__FILE__,__LINE__)
+	# define EllFREE(buffer) //med_free_ext_mem_ext(buffer,__FILE__,__LINE__)
 # else
 	# define EllMALLOC malloc
 	# define EllFREE free
 # endif
 
-//# define MEMORY_MONITOR_ENABLE
+# define MEMORY_MONITOR_ENABLE
 # ifdef MEMORY_MONITOR_ENABLE
+# define MMT_MASK_LENGTH 1024
+unsigned char* mmt_mask = 0 ;
 MEMORY_MONITOR mem_monitor = { 0 , 0 , 0 , 0 , 0 , 0 } ;
-int MemoryMonitorInit ( MEMORY_MONITOR* mem_monitor ) {
+int MMTInit () {
 
 	//	author : Jelo Wang
 	//	since : 20100418
 	//	(C)TOK
-
-	if ( !mem_monitor ) return 0 ; 
 	
-	mem_monitor->file = 0 ;
-	mem_monitor->line = 0 ;
-	mem_monitor->length = 0 ;
-	mem_monitor->address = 0 ;	
-	mem_monitor->head = 0 ;		
-	mem_monitor->next = 0 ;
+	mem_monitor.file = 0 ;
+	mem_monitor.line = 0 ;
+	mem_monitor.length = 0 ;
+	mem_monitor.address = 0 ;	
+	mem_monitor.head = 0 ;		
+	mem_monitor.next = 0 ;
 
-	return (int)mem_monitor ;
+	return 1 ;
 		
 }
 
-void MemoryMonitorAdd ( MEMORY_MONITOR* mem_monitor , char* file , int line , int length , int address ) {
+void MMTCreateMask ()
+{
+
+	//	author : Jelo Wang
+	//	since : 20110705
+	//	(C)TOK
+
+	int looper = 0 ;
+	
+	mmt_mask = (unsigned char* ) EllMALLOC ( MMT_MASK_LENGTH ) ;
+
+	for ( looper = 0 ; looper < MMT_MASK_LENGTH ; looper ++ )
+	{
+		mmt_mask [ looper ] = looper ;
+	}
+
+}
+
+void MMTAdd ( char* file , int line , int length , int address ) {
 	
 	//	author : Jelo Wang
 	//	since : 20100418
 	//	(C)TOK
 
 	MEMORY_MONITOR* newmem = 0 ;
-	
-	if ( !mem_monitor ) return ;
 
 	newmem	= (MEMORY_MONITOR* ) EllMALLOC ( sizeof(MEMORY_MONITOR) ) ;
+
+	if ( 0 == mmt_mask ) MMTCreateMask () ;
+
+	memcpy ( (void*)((unsigned int)address+length) , mmt_mask , MMT_MASK_LENGTH ) ;
 
 	if ( file ) {
 		newmem->file = (char* ) EllMALLOC ( strlen ( file ) + 1 ) ;
@@ -83,49 +103,93 @@ void MemoryMonitorAdd ( MEMORY_MONITOR* mem_monitor , char* file , int line , in
 	newmem->line = line ; 
 	newmem->length = length ;
 	newmem->address = address ;
-	newmem->head = mem_monitor->next ;
+	newmem->head = 0 ;
 	newmem->next = 0 ;
-
-	if ( 0 == mem_monitor->head ) {
-		mem_monitor->head = newmem ;
-		mem_monitor->next = newmem ;
+ 
+	if ( 0 == mem_monitor.head ) {
+		mem_monitor.head = newmem ;
+		mem_monitor.next = newmem ;
 	} else {
-		mem_monitor->next->next = newmem ;
-		mem_monitor->next = newmem ;
+		mem_monitor.next->next = newmem ;
+		mem_monitor.next = newmem ;
 	}
 
 }
 
-void MemoryMonitorFree ( MEMORY_MONITOR* mem_monitor , int address ) {
+void MMTCheckOverflow () {
+
+	//	author : Jelo
+	//	since : 2011.4.10
+	//	(C)TOK
+	
+	//	notes : 识别溢出内存块
+
+	MEMORY_MONITOR* looper = 0 ;
+	unsigned char* mask = 0 ;
+
+	mask = (unsigned char* ) EllMALLOC ( MMT_MASK_LENGTH ) ;
+
+	for ( looper = mem_monitor.head ; looper ; looper=looper->next ) 
+	{
+
+		int counter = 0 ;
+		
+		memcpy ( mask , (void*)((unsigned int )looper->address+looper->length) , MMT_MASK_LENGTH ) ;
+
+		for ( counter = 0 ; counter < MMT_MASK_LENGTH ; counter ++ )
+		{
+			if ( mask [ counter ] != mmt_mask [ counter ] )
+			{
+				EllLog ( "!!!!! M : %x , In : '%s' , At line : '%d' - overflowed\n" , looper->address , looper->file , looper->line ) ;	
+				EllFREE ( mask ) ;
+				return ;
+			}
+		}		
+
+	}
+	
+}
+
+void MMTFree ( int address ) {
 	
 	//	author : Jelo Wang
 	//	since : 20100418
 	//	(C)TOK
 
-	MEMORY_MONITOR* walker = mem_monitor->head ;
-
+	MEMORY_MONITOR* walker = mem_monitor.head ;
+	MEMORY_MONITOR* pre = &mem_monitor ;
+	
 	if ( !address ) return ;
 
-	for ( ;walker && walker->address != address ;walker = walker->next ) ;
-
-	if ( walker ) {
-
-		if ( walker->head ) 
-		walker->head->next = walker->next ; 
+	for ( ; walker ; ) {
 		
-		if ( walker->next ) 
-		walker->next->head = walker->head ;
-		
-	# ifdef MTK_ELL
-	//	EllFREE ( (void*) &walker ) ;
-	# else
-	//	EllFREE ( walker ) ;
-	# endif
+		if ( address == walker->address ) {
+			if ( walker == mem_monitor.head ) {
+				mem_monitor.head = walker->next ;
+				if ( walker->file ) EllFREE ( walker->file ) ;
+				EllFREE ( walker ) ;
+				return ;
+			} else {
+				pre->next = walker->next ;
+				if ( walker == mem_monitor.next ) {
+					mem_monitor.next = pre ;
+				}
+				if ( walker->file ) EllFREE ( walker->file ) ;
+				EllFREE ( walker ) ;
+				return ;
+			}
+			
+		}
+
+		pre = walker ;
+		walker = walker->next ;
+			
 	}
 	
 }
 
-void MemoryMonitorDestroy ( MEMORY_MONITOR* mem_monitor ) {
+
+void MMTDestroy () {
 	
 	//	author : Jelo Wang
 	//	since : 20100418
@@ -133,66 +197,13 @@ void MemoryMonitorDestroy ( MEMORY_MONITOR* mem_monitor ) {
 
 	MEMORY_MONITOR* walker = 0 ;
 	
-	if ( !mem_monitor ) return ;
-
-	for ( walker = mem_monitor->head ; walker ; ) {
-
-		mem_monitor->next = walker->next ;
-		
-		if ( walker->file ) {
-
-			# ifdef MTK_ELL
-				EllFREE ( (void*) &walker->file ) ;
-			# else
-				EllFREE ( walker->file ) ;
-			# endif
-
-		}
-
-		# ifdef MTK_ELL
-			EllFREE ( (void*) &walker ) ;
-		# else
-			EllFREE ( walker ) ;
-		# endif
-
-		walker = mem_monitor->next ;
-
+	for ( walker = mem_monitor.head ; walker ; ) {
+		mem_monitor.next = walker->next ;
+		if ( walker->file ) EllFREE ( walker->file ) ;
+		EllFREE ( walker ) ;
+		walker = mem_monitor.next ;
 	}
 	
-}
-
-int EllHalMemoryLeaked () {
-
-	//	author : Jelo Wang
-	//	since : 20091129
-
-	# ifdef MEMORY_MONITOR_ENABLE
-		
-		int totall = 0 ;
-		MEMORY_MONITOR* walker = mem_monitor.head ;
-	
-		for ( ;walker;walker=walker->next) {
-
-			EllLog ("address:%x,length:%d,file:'%s',line:%d - leaked\n",
-				walker->address,\
-				walker->length,\
-				walker->file,\
-				walker->line\
-			) ;\
-
-			
-			totall = totall + walker->length ;
-			
-		}
-
-		MemoryMonitorDestroy ( &mem_monitor ) ;
-
-		//	EllLog ("%1.3f kb memory is leaked.\n",(float)(totall/1024)) ;
-		EllLog ( "memory leaked %d bytes totall.\n" , totall ) ;
-
-	# endif
-
-	return 0 ;
 }
 
 # endif
@@ -205,15 +216,14 @@ void* EllNormalloc ( long int length , char* file , int line ) {
 	
 	void* buffer = 0 ;
 
-	if ( !length ) 
-		return 0 ;
-	
-	buffer = (void*) EllMALLOC ( length ) ;
-
-	if ( buffer ) memset ( buffer , 0 , length ) ;
-
 	# ifdef MEMORY_MONITOR_ENABLE
-		MemoryMonitorAdd ( &mem_monitor , file , line , length , (int)buffer ) ;
+		buffer = (void*) EllMALLOC ( length + MMT_MASK_LENGTH ) ;
+		memset ( buffer , 0 , length + MMT_MASK_LENGTH ) ;
+		MMTAdd ( file , line , length , (int)buffer ) ;
+		MMTCheckOverflow () ;
+	# else
+		buffer = (void*) EllMALLOC ( length ) ;
+		if ( buffer ) memset ( buffer , 0 , length ) ;
 	# endif
 	
 	return buffer ;
@@ -227,18 +237,20 @@ int EllFree ( void* buffer ) {
 	//	since : 20090809
 
 	# ifdef MEMORY_MONITOR_ENABLE
-		MemoryMonitorFree ( &mem_monitor , (int)buffer ) ;
+		MMTCheckOverflow () ; 
+		MMTFree ( (int)buffer ) ; 
 	# endif
 
 # ifdef MTK_ELL
-		//EllFREE ( (void**)&buffer ) ;
+	//EllFREE ( buffer ) ;
 # else
-		EllFREE ( buffer ) ;
+	EllFREE ( buffer ) ;
 # endif
 
 	return 1 ;
 
 }
+
 
 int EllFreeEx ( void** buffer ) {
 
@@ -247,11 +259,12 @@ int EllFreeEx ( void** buffer ) {
 	//	since : 20090809
 
 	# ifdef MEMORY_MONITOR_ENABLE
-		MemoryMonitorFree ( &mem_monitor , (int)*buffer ) ;
+		MMTCheckOverflow () ; 
+		MMTFree ( (int)*buffer ) ; 
 	# endif
 
 # ifdef MTK_ELL
-	//EllFREE ( buffer ) ;
+	//EllFREE ( *buffer ) ;
 # else
 	EllFREE ( *buffer ) ;
 # endif

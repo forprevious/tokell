@@ -1,7 +1,7 @@
 
 /*
 
-+	Executable Linking-Library 1.0.1.
++	Executable Linking-Library 1.0.0.
 +	Architecture : ARMv6
 
 +	'Executable Linking-Library' is a Dynamic Linking solution for closed runing environment.
@@ -34,7 +34,7 @@
 
 ELL* ell = 0 ;
 
-int EllDynamicPoolCreate ( int elltype , int routineset ) {
+int EllDynamicPoolCreate () {
 
 	//	author : Jelo Wang
 	//	(C)TOK
@@ -42,11 +42,6 @@ int EllDynamicPoolCreate ( int elltype , int routineset ) {
 	//	notes : Create an Excutable Linked Library
 
 	ELL* nell = (ELL* ) EllMalloc ( sizeof(ELL) ) ;
-
-	if ( !nell ) return 0 ;
-	
-	nell->type = elltype ;
-	nell->set = routineset ;
 	
 	nell->ObjectList = EllSlListCreate () ;
 
@@ -78,7 +73,8 @@ int EllDynamicPoolInsertApplication ( char* application ) {
 
 	obcounter = EllGetAllObjectFileFromDirectory ( ell->ObjectList , application ) ;
 	
-	ell->ObjTotall = obcounter ;	
+	ell->ObjTotall = obcounter ;
+	
 	ell->ObjectBased = (int* ) EllMalloc ( sizeof(int)*ell->ObjTotall ) ;
 	
 	if ( !ell->ObjectBased ) {
@@ -88,13 +84,26 @@ int EllDynamicPoolInsertApplication ( char* application ) {
 
 	ell->Sym.elf32_sym = (Elf32_Sym ** ) EllMalloc ( sizeof(Elf32_Sym*)*obcounter ) ;
 	ell->Shdr.elf32_shdr = (Elf32_Shdr ** ) EllMalloc ( sizeof(Elf32_Shdr*)*obcounter ) ;
-
-	if ( ELL_STATIC == ell->type ) return (int) ell ;
-	
 	ell->TextRel.elf32_rel = (Elf32_Rel ** ) EllMalloc ( sizeof(Elf32_Rel*)*obcounter ) ;
 	ell->DataRel.elf32_rel = (Elf32_Rel ** ) EllMalloc ( sizeof(Elf32_Rel*)*obcounter ) ;
 	ell->TextRela.elf32_rela = (Elf32_Rela ** ) EllMalloc ( sizeof(Elf32_Rela*)*obcounter ) ;
 	ell->DataRela.elf32_rela = (Elf32_Rela ** ) EllMalloc ( sizeof(Elf32_Rela*)*obcounter ) ;
+
+# if 0
+	{
+		int looper = 0 ;
+		for ( looper = 0 ; looper <  obcounter ; looper ++ ) {
+
+			ell->TextRel.elf32_rel[looper] = 0 ;
+			ell->DataRel.elf32_rel[looper] = 0 ;
+			
+			ell->TextRela.elf32_rela[looper] = 0 ;
+			ell->DataRela.elf32_rela[looper] = 0 ;
+			
+		}
+		
+	}
+# endif 
 
 	return (int) ell ;
 		
@@ -112,7 +121,7 @@ int EllDynamicPoolCreateSymbols ( int obid , int totall ) {
 
 	//	|looper |length of SYMBOL TABLE |symbol1 | |symbol2 |...|symboln |
 	//	Get 2 additional unit for saving looper and totall of SYMBOLES
-	ell->Sym.elf32_sym[obid] = (Elf32_Sym* ) EllMalloc ( sizeof(Elf32_Sym)*(totall+2) ) ;
+	ell->Sym.elf32_sym[obid] = (Elf32_Sym* ) EllMalloc ( 2*sizeof(Elf32_Sym) + (totall*sizeof(Elf32_Sym)) ) ;
 	
 	if ( !ell->Sym.elf32_sym[obid] ) return 0 ;
 
@@ -424,8 +433,8 @@ int EllGetAllObjectFileFromDirectory ( int list , char* application ) {
 	int counter = 0 ;
 
 	char path [256] = { 0 } ;
-	
-	EllSlListInsert ( list , (int)"e:\\ell\\ellapp.esl" ) ;
+		
+	EllSlListInsert ( list , (int)"F:\\TOK\\test\\test.ell" ) ;
 		
 	counter ++ ;
 	
@@ -446,11 +455,7 @@ int EllGetAllObjectFileFromDirectory ( int list , char* application ) {
 	HANDLE hDir ;
 
 	char path [256] = { 0 } ;
-
-	if ( ELL_STATIC == ell->type )
-		sprintf ( path , "e:\\ell\\%s\\obj\\*.esl" , application ) ;
-	else if ( ELL_DYNAMIC == ell->type )
-		sprintf ( path , "e:\\ell\\%s\\obj\\*.ell" , application ) ;
+	sprintf ( path , "f:\\TOK\\ell\\test\\%s\\*.ell" , application ) ;
 
 	hDir = FindFirstFile( path , &finfo ) ;
 	if (hDir == INVALID_HANDLE_VALUE) return 0 ;
@@ -458,7 +463,7 @@ int EllGetAllObjectFileFromDirectory ( int list , char* application ) {
 	while (result)  {
 
 		char* string = 0 ;
-		sprintf ( path , "e:\\ell\\%s\\obj\\%s" , application , finfo.cFileName ) ;
+		sprintf ( path , "f:\\TOK\\ell\\test\\%s\\%s" , application , finfo.cFileName ) ;
 		string = (char* ) EllMalloc ( strlen(path) + 1 ) ;
 		strcpy ( string , path ) ;
 		
@@ -512,7 +517,7 @@ int EllElfMapNolSectCreate ( int obid , int totall ) {
 
 	//	|looper |totall length of SECTIONS |section1| |section2 |...|sectionn |
 	//	Get 2 additional unit for saving looper and totall of SECTIONS
-	ell->Shdr.elf32_shdr[obid] = (Elf32_Shdr* ) EllMalloc ( sizeof(Elf32_Shdr) * (totall+2) ) ;
+	ell->Shdr.elf32_shdr[obid] = (Elf32_Shdr* ) EllMalloc ( (2*sizeof(Elf32_Shdr) + (totall*sizeof(Elf32_Shdr))) ) ;
 
 	if ( !ell->Shdr.elf32_shdr[obid] ) return 0 ;
 	
@@ -521,7 +526,7 @@ int EllElfMapNolSectCreate ( int obid , int totall ) {
 	EllMemcpy ( (void*)((int)ell->Shdr.elf32_shdr[obid]+0*sizeof(Elf32_Shdr)) , &value , sizeof(int) ) ;
 
 	//	totall
-	value = totall + 2 ;
+	value = totall + 2;
 	EllMemcpy ( (void*)((int)ell->Shdr.elf32_shdr[obid]+1*sizeof(Elf32_Shdr)) , &value , sizeof(int) ) ;
 	
 
@@ -676,46 +681,60 @@ void EllElfMapNolSectDestroy ( int obidborder ) {
 }
 
 
-int EllElfMapRelocRelCreate ( Elf32_Rel** elf32_rel , int obid , int totall ) {
+int EllElfMapRelocRelCreate ( ELLRELSEC relsec , int obid , int totall ) {
 
 	//	author : Jelo Wang
 	//	(C)TOK
 
 	int value = 0 ;
+	Elf32_Rel** elf32_rel = 0 ;
 
 	if ( !totall || !ell  ) return 0 ;
 
 	//	|looper |totall length of REL |rel1| |rel2 |...|reln |
 	//	Get 2 additional unit for saving looper and totall of REL
-	elf32_rel[obid] = (Elf32_Rel* ) EllMalloc ( sizeof(Elf32_Rel) * (totall*12) ) ;
+	if ( ELL_REL_SECT_TEXT == relsec ) {
+		elf32_rel = ell->TextRel.elf32_rel ;
+	} else if ( ELL_REL_SECT_DATA == relsec ) {
+		elf32_rel = ell->DataRel.elf32_rel ;
+	} else if ( ELL_REL_SECT_CONSTDATA == relsec ) {
+		elf32_rel = ell->ConstRel.elf32_rel ;
+	}
+	
+	elf32_rel [obid] = (Elf32_Rel* ) EllMalloc ( (2*sizeof(Elf32_Rel)) + (totall*sizeof(Elf32_Rel)) ) ;
 
-	if ( !elf32_rel[obid] ) return 0 ;
+	if ( !elf32_rel [obid] ) return 0 ;
 	
 	//	looper
 	value = 2 ;
-	EllMemcpy ( (void*)((int)elf32_rel[obid]+0*sizeof(Elf32_Rel)) , &value , sizeof(int) ) ;
+	EllMemcpy ( (void*)((int)elf32_rel [obid]+0*sizeof(Elf32_Rel)) , &value , sizeof(int) ) ;
 
 	//	totall
 	value = totall + 2 ;
-	EllMemcpy ( (void*)((int)elf32_rel[obid]+1*sizeof(Elf32_Rel)) , &value , sizeof(int) ) ;
+	EllMemcpy ( (void*)((int)elf32_rel [obid]+1*sizeof(Elf32_Rel)) , &value , sizeof(int) ) ;
 	
-
 	return 1 ;
 	
 	
 }
 
 
-int EllElfMapRelocRelInsert ( Elf32_Rel** elf32_rel , int obid , void* buffer ) {
+int EllElfMapRelocRelInsert ( ELLRELSEC relsec , int obid , void* buffer ) {
 
 	//	author : Jelo Wang
 	//	(C)TOK
 
 	int looper = 0 ;
 	int totall = 0 ;
+	Elf32_Rel** elf32_rel = 0 ;
 	Elf32_Rel* rel = 0 ;
 	
-	if ( !elf32_rel[obid] ) return 0 ; 
+	if ( ELL_REL_SECT_TEXT == relsec ) elf32_rel = ell->TextRel.elf32_rel ;
+	else if ( ELL_REL_SECT_DATA == relsec ) elf32_rel = ell->DataRel.elf32_rel ;
+	else if ( ELL_REL_SECT_CONSTDATA == relsec ) elf32_rel = ell->ConstRel.elf32_rel ;
+
+	if ( !elf32_rel ) return 0 ;
+	if ( !elf32_rel[obid] ) return 0 ;
 
 	//	|looper |totall length of REL |section1| |section2 |...|sectionn |
 	//	get looper and totall length of REL from elf32_rel[obid]
@@ -741,32 +760,42 @@ int EllElfMapRelocRelInsert ( Elf32_Rel** elf32_rel , int obid , void* buffer ) 
 	
 }
 
-int EllElfMapRelocGetLborder ( Elf32_Rel** elf32_rel , int obid ) {
+int EllElfMapRelocGetLborder ( ELLRELSEC relsec , int obid ) {
 
 	//	author : Jelo Wang
 	//	(C)TOK
 
 	int lborder = 0 ;
+	Elf32_Rel** elf32_rel = 0 ;
 	Elf32_Rel* rel = 0 ;
 
-	if ( !elf32_rel[obid] ) return 0 ; 
+	if ( ELL_REL_SECT_TEXT == relsec ) elf32_rel = ell->TextRel.elf32_rel ;
+	else if ( ELL_REL_SECT_DATA == relsec ) elf32_rel = ell->DataRel.elf32_rel ;
+	else if ( ELL_REL_SECT_CONSTDATA == relsec ) elf32_rel = ell->ConstRel.elf32_rel ;
+
+	if ( !elf32_rel ) return 0 ;
+	if ( !elf32_rel[obid] ) return 0 ;
 
 	//	|looper |totall length of REL |section1| |section2 |...|sectionn |
 	//	get looper and totall length of REL from elf32_rel[obid]
 	rel = (Elf32_Rel*)((int)elf32_rel[obid]+1*sizeof(Elf32_Rel)) ;
  	lborder = rel->r_offset ;
 
-
 	return lborder ;
 	
 }
 
-void EllElfMapRelocDestroy ( Elf32_Rel** elf32_rel , int obidborder ) {
+void EllElfMapRelocDestroy (  ELLRELSEC relsec , int obidborder ) {
 
 	//	author : Jelo Wang
 	//	(C)TOK
 
 	int obidlooper = 0 ;
+	Elf32_Rel** elf32_rel = 0 ; 
+		
+	if ( ELL_REL_SECT_TEXT == relsec ) elf32_rel = ell->TextRel.elf32_rel ;
+	else if ( ELL_REL_SECT_DATA == relsec ) elf32_rel = ell->DataRel.elf32_rel ;
+	else if ( ELL_REL_SECT_CONSTDATA == relsec ) elf32_rel = ell->ConstRel.elf32_rel ;
 
 	if ( !elf32_rel ) return ;
 	

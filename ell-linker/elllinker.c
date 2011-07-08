@@ -1,7 +1,7 @@
 
 /*
 
-+	Executable Linking-Library 1.0.1.
++	Executable Linking-Library 1.0.0.
 +	Architecture : ARMv6
 
 +	'Executable Linking-Library' is a Dynamic Linking solution for closed runing environment.
@@ -27,10 +27,10 @@
 # include "ellhal.h"
 # include "elllinker.h"
 
-ELLLINKER EllLinker = { 0 , 0 } ;
+ELLLINKER EllLinker = { 0 , ELL_LOCAL_LINKER } ;
 ELLLINKERMEMORYPOOL EllLinkerMemoryPool = { 0 , 0 , 0 } ;
 
-int EllLocalLinker ( int obid , int file , int ER_RO_RW_Rel , int ER_RO_ZI_Rel ) {
+int EllLocalLinker ( int obid , int file ) {
 
 	//	author : Jelo Wang
 	//	notes : link single object file
@@ -41,81 +41,7 @@ int EllLocalLinker ( int obid , int file , int ER_RO_RW_Rel , int ER_RO_ZI_Rel )
 	int looper = 2 ;
 	int lborder = EllElfMapNolSectGetLborder ( obid ) ;
 	int gotsect = 0 ;
-	
-	Elf32_Shdr* elf32_shdr = { 0 } ;
-
-	# ifdef ELL_DEBUG	
-		EllLinkerMemoryPool.base = 0 ;
-	# endif
-
-	EllLinker.obidborder = 1 ;
-	EllLinker.status = ELL_LOCAL_LINKER ;
-	
-	//	copy .text , .data , .rodata , .constdata , .bss to EllLinkerMemoryPool
-	for ( looper = 2 ; looper < lborder ; gotsect = 0 , looper ++ ) {
-	
-		Elf32_Shdr* aelf32_shdr = (Elf32_Shdr* )((int)ell->Shdr.elf32_shdr[obid]+looper*sizeof(Elf32_Shdr)) ;
-	
-		if ( SHT_PROGBITS == aelf32_shdr->sh_type ) {
-
-			gotsect = 1 ;
-			
-		} else if ( SHT_NOBITS == aelf32_shdr->sh_type ) {
-		
-			ELL_4BYTES_ALIGN ( EllLinkerMemoryPool.looper ) ;
-
-			aelf32_shdr->sh_offset = EllLinkerMemoryPool.looper ;
-			EllLinkerMemoryPool.looper = EllLinkerMemoryPool.looper + aelf32_shdr->sh_size ;			
-			gotsect = 0 ;
-			
-		}
-
-		if ( gotsect ) {
-
-			ELL_4BYTES_ALIGN ( EllLinkerMemoryPool.looper ) ;		
-			EllHalFileSeek ( file , aelf32_shdr->sh_offset , ELLHAL_SEEK_HEAD ) ;
-			EllHalFileRead ( file , (void* )((int)EllLinkerMemoryPool.pool+EllLinkerMemoryPool.looper) , 1 , aelf32_shdr->sh_size ) ;
-			
-			aelf32_shdr->sh_offset = EllLinkerMemoryPool.looper ;
-			EllLinkerMemoryPool.looper = EllLinkerMemoryPool.looper + aelf32_shdr->sh_size ;				
-		
-		}
-		
-	}
-
-	if ( ER_RO_RW_Rel ) {
-		
-		elf32_shdr = (Elf32_Shdr* )EllElfMapNolSectGet ( obid , "ER_RW" ) ; 
-		gotsect = elf32_shdr->sh_offset + EllLinkerMemoryPool.base ;
-		EllMemcpy ( (void* )((int)EllLinkerMemoryPool.pool+ER_RO_RW_Rel) , &gotsect , sizeof(int) ) ;	
-		
-	}
-	
-	if ( ER_RO_ZI_Rel ) {
-		
-		elf32_shdr = (Elf32_Shdr* )EllElfMapNolSectGet ( obid , "ER_ZI" ) ; 
-		gotsect = elf32_shdr->sh_offset + EllLinkerMemoryPool.base ;
-		EllMemcpy ( (void* )((int)EllLinkerMemoryPool.pool+ER_RO_ZI_Rel) , &gotsect , sizeof(int) ) ;
-		
-	}
-
-	EllHalFileClose ( file ) ;
-	
-	return results ;
-
-}
-
-int EllLocalLinkerEx ( int obid , int file ) {
-
-	//	author : Jelo Wang
-	//	notes : link single object file
-	//	(C)TOK
-
-	int results = 1 ;
-	//	as for why plus 2 here , check out ell.c
-	int looper = 2 ;
-	int lborder = EllElfMapNolSectGetLborder ( obid ) ;
-	int gotsect = 0 ;
+	int address = 0 ;
 
 	# ifdef ELL_DEBUG	
 		EllLinkerMemoryPool.base = 0 ;
@@ -124,13 +50,28 @@ int EllLocalLinkerEx ( int obid , int file ) {
 	EllLinker.obidborder = 0 ;
 	EllLinker.status = ELL_LOCAL_LINKER ;
 	
+	address = (int)ell->Shdr.elf32_shdr[obid];
+
 	//	copy .text , .data , .rodata , .constdata , .bss to EllLinkerMemoryPool
 	for ( looper = 2 ; looper < lborder ; gotsect = 0 , looper ++ ) {
-	
-		Elf32_Shdr* aelf32_shdr = (Elf32_Shdr* )((int)ell->Shdr.elf32_shdr[obid]+looper*sizeof(Elf32_Shdr)) ;
-	
+		
+  		Elf32_Shdr* aelf32_shdr = (Elf32_Shdr* )(address+looper*sizeof(Elf32_Shdr)) ;
+
 		if ( SHT_PROGBITS == aelf32_shdr->sh_type ) {
 
+# if 0			
+			if ( !strcmp ( ".text" , (char*)aelf32_shdr->sh_name ) ) {
+				gotsect = 1 ;
+			} else if ( !strcmp ( ".data" , (char*)aelf32_shdr->sh_name ) ) {
+				gotsect = 1 ;
+			} else if ( !strcmp ( ".rodata" , (char*)aelf32_shdr->sh_name ) ) {
+				gotsect = 1 ;
+			} else if ( !strcmp ( ".constdata" , (char*)aelf32_shdr->sh_name ) ) {
+				gotsect = 1 ;
+			} if ( !strcmp ( "_ell_text" , (char*)aelf32_shdr->sh_name ) ) {
+				gotsect = 1 ;
+			} 
+# endif
 			gotsect = 1 ;
 			
 		} else if ( SHT_NOBITS == aelf32_shdr->sh_type ) {
@@ -164,7 +105,7 @@ int EllLocalLinkerEx ( int obid , int file ) {
 
 	//	As for why plus 2 here , check out ell.c
 	looper = 2 ;
-	lborder = EllElfMapRelocGetLborder ( ell->TextRel.elf32_rel , obid ) ;
+	lborder = EllElfMapRelocGetLborder ( ELL_REL_SECT_TEXT , obid ) ;
 	
 	//	Resolve TextRel
  	if ( !EllReloc ( ell->TextRel.elf32_rel[obid] , EllTextReloc , looper , lborder , obid ) ) {
@@ -174,13 +115,23 @@ int EllLocalLinkerEx ( int obid , int file ) {
 
 	//	As for why plus 2 here , check out ell.c
 	looper = 2 ;
-	lborder = EllElfMapRelocGetLborder ( ell->DataRel.elf32_rel , obid ) ;
+	lborder = EllElfMapRelocGetLborder ( ELL_REL_SECT_DATA , obid ) ;
 	
 	//	Resolve DataRel
 	if ( !EllReloc ( ell->DataRel.elf32_rel[obid] , EllDataReloc , looper , lborder , obid ) ) {
 		EllHalFileClose ( file ) ;
 		results = 0 ;
 	}
+
+	//	As for why plus 2 here , check out ell.c
+	looper = 2 ;
+	lborder = EllElfMapRelocGetLborder ( ELL_REL_SECT_CONSTDATA , obid ) ;
+	
+	//	Resolve ConstRel
+	//if ( !EllReloc ( ell->ConstRel.elf32_rel[obid] , EllDataReloc , looper , lborder , obid ) ) {
+	//	EllHalFileClose ( file ) ;
+	//	results = 0 ;
+	//}
 
 	EllHalFileClose ( file ) ;
 
@@ -207,7 +158,7 @@ int EllGlobalLinker ( int obidborder ) {
 
 		//	As for why plus 2 here , check out ell.c
 		looper = 2 ;
-		lborder = EllElfMapRelocGetLborder ( ell->TextRel.elf32_rel , obilooper ) ;
+		lborder = EllElfMapRelocGetLborder ( ELL_REL_SECT_TEXT , obilooper ) ;
 			
 		//	Resolve textreloctab
 		if ( !EllReloc ( ell->TextRel.elf32_rel[obilooper] , EllTextReloc , looper , lborder , obilooper ) ) {
@@ -216,12 +167,22 @@ int EllGlobalLinker ( int obidborder ) {
 
 		//	As for why plus 2 here , check out ell.c
 		looper = 2 ;
-		lborder = EllElfMapRelocGetLborder ( ell->DataRel.elf32_rel , obilooper ) ;
+		lborder = EllElfMapRelocGetLborder ( ELL_REL_SECT_DATA , obilooper ) ;
 			
 		//	Resolve textreloctab
 		if ( !EllReloc ( ell->DataRel.elf32_rel[obilooper] , EllDataReloc , looper , lborder , obilooper ) ) {
 			results = 0 ;
 		}
+
+		//	As for why plus 2 here , check out ell.c
+		looper = 2 ;
+		lborder = EllElfMapRelocGetLborder ( ELL_REL_SECT_CONSTDATA , obilooper ) ;
+		
+		//	Resolve ConstRel
+		//if ( !EllReloc ( ell->ConstRel.elf32_rel[obid] , EllDataReloc , looper , lborder , obilooper ) ) {
+		//	EllHalFileClose ( file ) ;
+		//	results = 0 ;
+		//}
 		
 	}
 
@@ -251,11 +212,11 @@ static int EllReloc ( Elf32_Rel* reloctab , int (*EllRelocKernal) ( Elf32_Rel* e
 
 			//	global symbol detected.
 			if ( SHN_UNDEF == elf32_sym->st_shndx && STB_GLOBAL == ELF32_ST_BIND(elf32_sym->st_info) ) {
-				EllLog ( "Ell Local Linker Warning -> external symbol : '%s' expected.\n",elf32_sym->st_name) ;
+				//EllLog ( "Ell Local Linker Warning -> external symbol : '%s' expected.\n",elf32_sym->st_name) ;
 				continue ;
 			} 
 
-			EllLog ( "Ell Local Linker Warning -> symbol : '%s' is relocated.\n",elf32_sym->st_name) ;
+			//EllLog ( "Ell Local Linker Warning -> symbol : '%s' is relocated.\n",elf32_sym->st_name) ;
 			
 		} else if ( ELL_GLOBAL_LINKER == EllLinker.status ) {
 
@@ -265,11 +226,11 @@ static int EllReloc ( Elf32_Rel* reloctab , int (*EllRelocKernal) ( Elf32_Rel* e
 	
 			if ( !elf32_sym ) {
 				elf32_sym = EllDynamicPoolLocalGetSymbol ( obid , ELF32_R_SYM(elf32_rel->r_info) ) ;
-				EllLog ( "Ell Global Linker Error -> external symbol : '%s' expected.\n",name) ;
+				//EllLog ( "Ell Global Linker Error -> external symbol : '%s' expected.\n",name) ;
 				results = 0 ;
 				continue ;
 			} else {
-				EllLog ( "Ell Global Linker Warning -> external symbol : '%s' detected.\n",elf32_sym->st_name) ;
+				//EllLog ( "Ell Global Linker Warning -> external symbol : '%s' detected.\n",elf32_sym->st_name) ;
 			}
 
 		}
@@ -281,6 +242,31 @@ static int EllReloc ( Elf32_Rel* reloctab , int (*EllRelocKernal) ( Elf32_Rel* e
 	}
 
 	return results ;
+
+}
+
+static int EllA( int type , char* address )
+{
+
+	//	author : Jelo Wang
+	//	notes : compose A value
+	//	(C)TOK	
+
+	int A = 0 ;
+
+	switch ( type )
+	{
+		case R_ARM_THM_PC22 :
+		break ;
+		case R_ARM_PC24 :
+		break ;
+		case R_ARM_ABS32 :
+			EllMemcpy ( &A , address , sizeof(int) ) ;
+		break ;
+		
+	}
+	
+	return A ;
 
 }
 
@@ -320,7 +306,7 @@ static int EllTextReloc ( Elf32_Rel* elf32_rel , Elf32_Sym* elf32_sym , int obid
 			//	еЊзд ARM Architecture Reference Manual 
 				
 			//	S - P + A
-			relca = (signed int)( elf32_sym->st_value - elf32_rel->r_offset ) / 2 - 2 ;
+			relca = (signed int)( elf32_sym->st_value - elf32_rel->r_offset - 4 ) / 2 ;
 			
 			//	the high part of the branch offset
 			high_branch_offset = (0x3ff800 & relca) >> 11 ;
@@ -331,7 +317,7 @@ static int EllTextReloc ( Elf32_Rel* elf32_rel , Elf32_Sym* elf32_sym , int obid
 			
 			//	the low part of the branch offset
 			low_branch_offset = 0x7ff & relca ;
-			 
+
 			//	the second thumb instruction
 			thumb2h8bit = 0xf8 | ( (0x700 & low_branch_offset) >> 8 ) ;  
 			thumb2l8bit = 0xff & low_branch_offset ;  
@@ -362,7 +348,7 @@ static int EllTextReloc ( Elf32_Rel* elf32_rel , Elf32_Sym* elf32_sym , int obid
 			//		to bit[1] of the byte offset.
 			//	еЊзд ARM Architecture Reference Manual 
 
-			relca = (signed int)( elf32_sym->st_value - elf32_rel->r_offset ) / 4 - 2 ;
+			relca = (signed int)( elf32_sym->st_value - elf32_rel->r_offset - 8 ) / 4 ;
 
 			if ( 33554430 < relca ) {
 				EllLog ( "EllReloc -> Error : offset is outside the range -33554432 to +33554430\n") ;

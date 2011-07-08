@@ -1,7 +1,7 @@
 
 /*
 
-+	Executable Linking-Library 1.0.1.
++	Executable Linking-Library 1.0.0.
 +	Architecture : ARMv6
 
 +	'Executable Linking-Library' is a Dynamic Linking solution for closed runing environment.
@@ -24,13 +24,6 @@
 
 # ifndef __ELLHAL
 # define __ELLHAL
-
-# ifdef WIN32
-# include <assert.h>
-# endif
-
-# undef ASSERT
-# define ASSERT assert
 
 typedef enum {
 
@@ -63,7 +56,7 @@ typedef struct MMN {
 	int length ;
 	int address ;
 	
-	struct MMN* head ;
+	struct MMN* head ;	
 	struct MMN* next ;
 	
 } MEMORY_MONITOR ;
