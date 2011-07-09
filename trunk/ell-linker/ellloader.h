@@ -1,7 +1,7 @@
 
 /*
 
-+	Executable Linking-Library 1.0.0.
++	Executable Linking-Library 1.0.2.
 +	Architecture : ARMv6
 
 +	'Executable Linking-Library' is a Dynamic Linking solution for closed runing environment.
@@ -28,21 +28,6 @@
 typedef enum {
 
 	//	author : Jelo Wang
-	//	since : 20110324
-	//	(C)TOK
-
-	//	stataic linking
-	//	load executable ELF
-	ELL_STATIC ,
-	//	dynamic linking
-	//	load relocatable ELF
-	ELL_DYNAMIC,
-
-} ELLTYPE ;
-
-typedef enum {
-
-	//	author : Jelo Wang
 	//	since : 20100626
 	//	(C)TOK
 	
@@ -54,7 +39,7 @@ typedef enum {
 # endif  
 
 extern void EllMemoryRegister ( void* buffer,  int length ) ;
-extern int EllInstall ( int file , int file2 ) ;
+extern int EllInstall ( int routineset , char* application ) ;
 extern int EllGetSymbolEntry ( int ell , char* symbol ) ;
 extern void EllUninstall ( int ell ) ;
 

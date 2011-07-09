@@ -1,8 +1,9 @@
 
 # include "ellhal.h"
 # include "ellloader.h"
+# include "ell.h"
 
-static int ell = 0 ;
+static int elllibrary = 0 ;
 
 typedef void (*ELLREGISTER ) ( int* address , int length ) ;
 ELLREGISTER ellregister = 0 ;
@@ -21,7 +22,7 @@ int main ( int argc , char* argv [] ) {
 		EllLog ( "ell ebuffer is NULL\n" ) ;
 		return 0 ;
 	}
-	
+
 	//	注册ebuffer，将ell 加载到该区域
 	EllMemoryRegister ( ebuffer , ebufferlength ) ;
 
@@ -29,11 +30,11 @@ int main ( int argc , char* argv [] ) {
 	//	参数1 : 指令集
 	//	参数2 : 应用程序(一个目录，ell以应用程序为单位被加载，
 	//	一个ell应用程序可有n个目标文件构成，ell通过动态连接器将这些目标文件变为可执行)
-	ell  = EllInstall ( ELL_THUMB16_ROUTINE , "GTKINGS" ) ;
+	elllibrary  = EllInstall ( ELL_THUMB16_ROUTINE , "GTKINGS" ) ;
 
 	//	取得符号入口(符号类型不仅仅局限在函数，全局变量等也可以访问)
-	ellregister = (ELLREGISTER) EllGetSymbolEntry ( ell , "RomSendDataToEll" ) ;
-	ellentry = (ELLENTRY) EllGetSymbolEntry ( ell  , "gtkings" ) ;
+	ellregister = (ELLREGISTER) EllGetSymbolEntry ( elllibrary , "RomSendDataToEll" ) ;
+	ellentry = (ELLENTRY) EllGetSymbolEntry ( elllibrary  , "gtkings" ) ;
 
 	EllLog ( "ell register %x\n" , ellregister ) ;
 	EllLog ( "ell entry %x\n" , ellentry ) ;
@@ -53,9 +54,9 @@ int main ( int argc , char* argv [] ) {
 	
 //	if ( ellentry ) ellentry () ;
 
-	EllUninstall ( ell ) ;
+	EllUninstall ( elllibrary ) ;
 	MMTCheckOverflow () ;
-	//EllHalMemoryLeaked () ;
+	MMTCheckLeaked () ;
 
 	return 1 ;
 

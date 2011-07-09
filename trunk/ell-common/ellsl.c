@@ -1,7 +1,7 @@
 
 /*
 
-+	Executable Linking-Library 1.0.0.
++	Executable Linking-Library 1.0.2.
 +	Architecture : ARMv6
 
 +	'Executable Linking-Library' is a Dynamic Linking solution for closed runing environment.
@@ -95,15 +95,12 @@ int EllSlListDelete ( int lt , int element ) {
 	for ( walker = list->head , pre = walker ; walker && walker->element != element ; pre = walker , walker = walker->next ) ;
 
 	if ( walker ) {
-		
 		pre->next = walker->next ; 
-
 		if ( walker == list->head )
 			list->head = pre ;
 		
 		if ( walker == list->next )
 			list->next = pre ;
-		
 		EllFree ( walker ) ;
 	}
 
