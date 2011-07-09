@@ -1,7 +1,7 @@
 
 /*
 
-+	Executable Linking-Library 1.0.1.
++	Executable Linking-Library 1.0.2.
 +	Architecture : ARMv6
 
 +	'Executable Linking-Library' is a Dynamic Linking solution for closed runing environment.
@@ -42,6 +42,7 @@ typedef struct {
 	//	since : 20100625
 	//	(C)TOK
 
+	int routineset ;
 	int obidborder ;
 	int status ;
 
@@ -63,8 +64,7 @@ typedef struct {
 extern ELLLINKER EllLinker ;
 extern ELLLINKERMEMORYPOOL EllLinkerMemoryPool ;
 
-extern int EllLocalLinker ( int obid , int file , int ER_RO_RW_Rel , int ER_RO_ZI_Rel ) ;
-extern int EllLocalLinkerEx ( int obid , int file ) ;
+extern int EllLocalLinker ( int obid , int file ) ;
 extern int EllGlobalLinker ( int obidborder ) ;
 
 static int EllReloc ( Elf32_Rel* reloctab , int (*EllRelocKernal) (Elf32_Rel*,Elf32_Sym*, int) , int looper , int lborder , int obid ) ;

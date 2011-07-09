@@ -1,7 +1,7 @@
 
 /*
 
-+	Executable Linking-Library 1.0.0.
++	Executable Linking-Library 1.0.2.
 +	Architecture : ARMv6
 
 +	'Executable Linking-Library' is a Dynamic Linking solution for closed runing environment.
@@ -89,7 +89,7 @@ int EllDynamicPoolInsertApplication ( char* application ) {
 	ell->TextRela.elf32_rela = (Elf32_Rela ** ) EllMalloc ( sizeof(Elf32_Rela*)*obcounter ) ;
 	ell->DataRela.elf32_rela = (Elf32_Rela ** ) EllMalloc ( sizeof(Elf32_Rela*)*obcounter ) ;
 
-# if 0
+# if 1
 	{
 		int looper = 0 ;
 		for ( looper = 0 ; looper <  obcounter ; looper ++ ) {
@@ -294,7 +294,11 @@ int EllDynamicPoolDestroy () {
 	for ( obidlooper = 0 ; obidlooper < ell->ObjTotall ; obidlooper ++ ) {
 
 		int totall_symbol = 0 ;
-		Elf32_Sym* elf32_sym = (Elf32_Sym*)((int)ell->Sym.elf32_sym[obidlooper]+1*sizeof(Elf32_Sym)) ;
+		Elf32_Sym* elf32_sym = 0 ;
+		
+		if ( 0 == ell->Sym.elf32_sym[obidlooper] ) continue ;
+
+		elf32_sym = (Elf32_Sym*)((int)ell->Sym.elf32_sym[obidlooper]+1*sizeof(Elf32_Sym)) ;
 
 		totall_symbol = elf32_sym->st_name ;
 
@@ -455,7 +459,7 @@ int EllGetAllObjectFileFromDirectory ( int list , char* application ) {
 	HANDLE hDir ;
 
 	char path [256] = { 0 } ;
-	sprintf ( path , "f:\\TOK\\ell\\test\\%s\\*.ell" , application ) ;
+	sprintf ( path , "f:\\ell\\%s\\*.ell" , application ) ;
 
 	hDir = FindFirstFile( path , &finfo ) ;
 	if (hDir == INVALID_HANDLE_VALUE) return 0 ;
@@ -463,7 +467,7 @@ int EllGetAllObjectFileFromDirectory ( int list , char* application ) {
 	while (result)  {
 
 		char* string = 0 ;
-		sprintf ( path , "f:\\TOK\\ell\\test\\%s\\%s" , application , finfo.cFileName ) ;
+		sprintf ( path , "f:\\ell\\%s\\%s" , application , finfo.cFileName ) ;
 		string = (char* ) EllMalloc ( strlen(path) + 1 ) ;
 		strcpy ( string , path ) ;
 		

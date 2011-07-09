@@ -1,7 +1,7 @@
 
 /*
 
-+	Executable Linking-Library 1.0.0.
++	Executable Linking-Library 1.0.2.
 +	Architecture : ARMv6
 
 +	'Executable Linking-Library' is a Dynamic Linking solution for closed runing environment.
@@ -142,8 +142,7 @@ int EllResolver ( int obid , char* path ) {
 
 	//	get .strtab offset , and resovle it
 	aelf32_shdr = (Elf32_Shdr* ) EllElfMapNolSectGet ( obid , ".strtab" ) ;
-	if ( 0 == aelf32_shdr ) return 0 ;
-	
+	if ( 0 == aelf32_shdr ) return 0 ;	
 	st_offset = aelf32_shdr->sh_offset ;
 
 	//	get .strtab offset , and resovle it
@@ -252,5 +251,5 @@ int EllResolver ( int obid , char* path ) {
 	
 	return file ;
 	
-}
+ }
 

@@ -1,7 +1,7 @@
 
 /*
 
-+	Executable Linking-Library 1.0.0.
++	Executable Linking-Library 1.0.2.
 +	Architecture : ARMv6
 
 +	'Executable Linking-Library' is a Dynamic Linking solution for closed runing environment.

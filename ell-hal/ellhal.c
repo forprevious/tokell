@@ -1,7 +1,7 @@
 
 /*
 
-+	Executable Linking-Library 1.0.1.
++	Executable Linking-Library 1.0.2.
 +	Architecture : ARMv6
 
 +	'Executable Linking-Library' is a Dynamic Linking solution for closed runing environment.
@@ -75,8 +75,7 @@ void MMTCreateMask ()
 	mmt_mask = (unsigned char* ) EllMALLOC ( MMT_MASK_LENGTH ) ;
 
 	for ( looper = 0 ; looper < MMT_MASK_LENGTH ; looper ++ )
-	{
-		mmt_mask [ looper ] = looper ;
+	{		mmt_mask [ looper ] = looper ;
 	}
 
 }
@@ -116,6 +115,23 @@ void MMTAdd ( char* file , int line , int length , int address ) {
 
 }
 
+void MMTDestroy () {
+	
+	//	author : Jelo Wang
+	//	since : 20100418
+	//	(C)TOK
+
+	MEMORY_MONITOR* walker = 0 ;
+	
+	for ( walker = mem_monitor.head ; walker ; ) {
+		mem_monitor.next = walker->next ;
+		if ( walker->file ) EllFREE ( walker->file ) ;
+		EllFREE ( walker ) ;
+		walker = mem_monitor.next ;
+	}
+	
+}
+
 void MMTCheckOverflow () {
 
 	//	author : Jelo
@@ -137,8 +153,7 @@ void MMTCheckOverflow () {
 		memcpy ( mask , (void*)((unsigned int )looper->address+looper->length) , MMT_MASK_LENGTH ) ;
 
 		for ( counter = 0 ; counter < MMT_MASK_LENGTH ; counter ++ )
-		{
-			if ( mask [ counter ] != mmt_mask [ counter ] )
+		{			if ( mask [ counter ] != mmt_mask [ counter ] )
 			{
 				EllLog ( "!!!!! M : %x , In : '%s' , At line : '%d' - overflowed\n" , looper->address , looper->file , looper->line ) ;	
 				EllFREE ( mask ) ;
@@ -147,7 +162,43 @@ void MMTCheckOverflow () {
 		}		
 
 	}
+
+	EllFREE ( mask ) ;
 	
+}
+
+int MMTCheckLeaked () {
+
+	//	author : Jelo Wang
+	//	since : 20091129
+
+		
+	int totall = 0 ;
+	int leakedtimes = 0 ;
+	
+	MEMORY_MONITOR* walker = mem_monitor.head ;
+	
+	for ( ;walker;walker=walker->next) {
+
+		EllLog ("!!! M : %x , S : %d , In '%s' , At line : '%d' - leaked\n",
+			walker->address,\
+			walker->length,\
+			walker->file,\
+			walker->line\
+		) ;\
+	
+		totall = totall + walker->length ;
+
+		leakedtimes ++ ;
+		
+	}
+
+	MMTDestroy () ;
+
+	EllLog ( "Leaked Totall : %d Bytes\n" , totall ) ;
+	EllLog ( "Leaked Times : %d\n" , leakedtimes ) ;
+
+	return 0 ;
 }
 
 void MMTFree ( int address ) {
@@ -189,22 +240,6 @@ void MMTFree ( int address ) {
 }
 
 
-void MMTDestroy () {
-	
-	//	author : Jelo Wang
-	//	since : 20100418
-	//	(C)TOK
-
-	MEMORY_MONITOR* walker = 0 ;
-	
-	for ( walker = mem_monitor.head ; walker ; ) {
-		mem_monitor.next = walker->next ;
-		if ( walker->file ) EllFREE ( walker->file ) ;
-		EllFREE ( walker ) ;
-		walker = mem_monitor.next ;
-	}
-	
-}
 
 # endif
 

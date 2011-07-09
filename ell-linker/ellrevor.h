@@ -1,7 +1,7 @@
 
 /*
 
-+	Executable Linking-Library 1.0.1.
++	Executable Linking-Library 1.0.2.
 +	Architecture : ARMv6
 
 +	'Executable Linking-Library' is a Dynamic Linking solution for closed runing environment.
@@ -23,6 +23,5 @@
 */
 
 
-extern int EllResolver( int obid , char* path , int* ER_RO_RW_Rel , int* ER_RO_ZI_Rel ) ;
-extern int EllResolverEx ( int obid , char* path ) ;
+extern int EllResolver ( int obid , char* path ) ;
 
