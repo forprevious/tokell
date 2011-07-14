@@ -59,19 +59,6 @@ int EllLocalLinker ( int obid , int file ) {
 
 		if ( SHT_PROGBITS == aelf32_shdr->sh_type ) {
 
-# if 0			
-			if ( !strcmp ( ".text" , (char*)aelf32_shdr->sh_name ) ) {
-				gotsect = 1 ;
-			} else if ( !strcmp ( ".data" , (char*)aelf32_shdr->sh_name ) ) {
-				gotsect = 1 ;
-			} else if ( !strcmp ( ".rodata" , (char*)aelf32_shdr->sh_name ) ) {
-				gotsect = 1 ;
-			} else if ( !strcmp ( ".constdata" , (char*)aelf32_shdr->sh_name ) ) {
-				gotsect = 1 ;
-			} if ( !strcmp ( "_ell_text" , (char*)aelf32_shdr->sh_name ) ) {
-				gotsect = 1 ;
-			} 
-# endif
 			gotsect = 1 ;
 			
 		} else if ( SHT_NOBITS == aelf32_shdr->sh_type ) {
@@ -245,18 +232,21 @@ static int EllReloc ( Elf32_Rel* reloctab , int (*EllRelocKernal) ( Elf32_Rel* e
 
 }
 
-static int EllA( int type , char* address )
+static int EllA ( int type , char* address )
 {
 
 	//	author : Jelo Wang
-	//	notes : compose A value
-	//	(C)TOK	
+	//	since : 2011-07-08
+	//	(C)TOK
+
+	//	compilers puts some additional value in the object-files which is relocation-value for linker.
+	//	linker using it for caculate symbol address in its section.
 
 	int A = 0 ;
 
 	switch ( type )
 	{
-		case R_ARM_THM_PC22 :
+		case R_ARM_THM_PC22 :			
 		break ;
 		case R_ARM_PC24 :
 		break ;
@@ -267,6 +257,52 @@ static int EllA( int type , char* address )
 	}
 	
 	return A ;
+
+}
+
+static int EllCaculateRelAddress ( int type , int E , int S , int P , int A )
+{
+
+	//	author : Jelo Wang
+	//	since : 2011-07-09
+	//	(C)TOK
+	
+	//	notes : S-P+A , S+A , S - E + A , ....
+
+	int address = 0 ;
+
+	switch ( type )
+	{
+		
+		case R_ARM_PC24 :
+			address = ( S - P + A - 8 ) >> 2 ;
+			if ( address > 0x2000000 || address < -0x2000000 ) {
+				EllLog ( "FE , Out of Range of R_ARM_PC24\r\n") ;
+			}
+		break ;
+
+		case R_ARM_ABS32 :
+			address = S + A ;
+		break ;
+
+		case R_ARM_REL32 :
+			address = S - P + A ;
+		break ;
+
+		case R_ARM_PC13 :
+			address = ( S - P + A ) >> 2 ;
+		break ;		
+
+		case R_ARM_THM_PC22 :
+			address = ( S - P + A - 8 ) >> 2 ;
+			if ( address > 0x400000 || address < -0x400000 ) {
+				EllLog ( "FE , Out of Range of R_ARM_THM_PC22\r\n") ;
+			}			
+		break ;
+			
+	}
+	
+	return address ;
 
 }
 
@@ -305,8 +341,12 @@ static int EllTextReloc ( Elf32_Rel* elf32_rel , Elf32_Sym* elf32_sym , int obid
 			//		branch offset and causes the subroutine call to take place.
 			//	Õª×Ô ARM Architecture Reference Manual 
 				
-			//	S - P + A
-			relca = (signed int)( elf32_sym->st_value - elf32_rel->r_offset - 4 ) / 2 ;
+			relca = EllCaculateRelAddress ( 
+				R_ARM_THM_PC22 , 
+				0 , 
+				elf32_sym->st_value , 
+				elf32_rel->r_offset , 
+				EllA (R_ARM_THM_PC22 , (char*)((int)EllLinkerMemoryPool.pool+elf32_rel->r_offset ) ) ;
 			
 			//	the high part of the branch offset
 			high_branch_offset = (0x3ff800 & relca) >> 11 ;
@@ -348,7 +388,12 @@ static int EllTextReloc ( Elf32_Rel* elf32_rel , Elf32_Sym* elf32_sym , int obid
 			//		to bit[1] of the byte offset.
 			//	Õª×Ô ARM Architecture Reference Manual 
 
-			relca = (signed int)( elf32_sym->st_value - elf32_rel->r_offset - 8 ) / 4 ;
+			relca = EllCaculateRelAddress ( 
+				R_ARM_PC24 , 
+				0 , 
+				elf32_sym->st_value , 
+				elf32_rel->r_offset , 
+				EllA (R_ARM_PC24 , (char*)((int)EllLinkerMemoryPool.pool+elf32_rel->r_offset ) ) ;
 
 			if ( 33554430 < relca ) {
 				EllLog ( "EllReloc -> Error : offset is outside the range -33554432 to +33554430\n") ;
@@ -360,28 +405,21 @@ static int EllTextReloc ( Elf32_Rel* elf32_rel , Elf32_Sym* elf32_sym , int obid
 				 
 			return 1 ;		
 
-		case R_ARM_ABS32:
-
-//			EllLog ( "name : %s\n" , elf32_sym->st_name ) ;
-//			EllLog ( "value : %d\n" , elf32_sym->st_value ) ;
-//			EllLog ( "size : %d\n" , elf32_sym->st_size ) ;
-//			EllLog ( "info : %d\n" , elf32_sym->st_info ) ;
-//			EllLog ( "other : %d\n" , elf32_sym->st_other ) ;
-//			EllLog ( "shndx : %d\n" , elf32_sym->st_shndx ) ;		
-
-			//	compiler puts some additional value in the object-files which is relocation-value for linker.
-			//	linker using it for caculate symbol address in its section.
-			value = (int)EllLinkerMemoryPool.pool [elf32_rel->r_offset] ;
+		case R_ARM_ABS32:	
 
 			//	caculate absolute address of a symbol
 			//	address = st_value + sh_addr + index * 4
-			//	index of symbo in section , index holds with elf32_sym->st_other		
-			
+			//	index of symbo in section , index holds with elf32_sym->st_other					
 			elf32_shdr_reffer = (Elf32_Shdr* )EllElfMapNolSectGetWithIndex ( obid , elf32_sym->st_shndx ) ;	
 
 			if ( !elf32_shdr_reffer ) return 0 ;
 
-			elf32_sym->st_value = elf32_shdr_reffer->sh_addr + value ; 
+			elf32_sym->st_value = EllCaculateRelAddress ( 
+				R_ARM_ABS32 , 
+				0 , 
+				elf32_shdr_reffer->sh_addr , 
+				0 , 
+				EllA (R_ARM_ABS32 , (char*)((int)EllLinkerMemoryPool.pool+elf32_rel->r_offset ) ) ;
 			
 			EllMemcpy( (void*)((int)EllLinkerMemoryPool.pool+elf32_rel->r_offset) , &elf32_sym->st_value , 4 ) ;
 				
@@ -389,6 +427,7 @@ static int EllTextReloc ( Elf32_Rel* elf32_rel , Elf32_Sym* elf32_sym , int obid
 				
 		default :
 			EllLog ( "EllReloc -> Error : unrecognized ELF32_R_TYPE : %d\n" , ELF32_R_TYPE(elf32_rel->r_info) ) ;
+			
 	}
 	
 	return 0 ;
@@ -413,29 +452,22 @@ static int EllDataReloc ( Elf32_Rel* elf32_rel , Elf32_Sym* elf32_sym , int obid
 		case R_ARM_NONE : return 1 ;
 		case R_ARM_ABS32:
 
-//			EllLog ( "name : %s\n" , elf32_sym->st_name ) ;
-//			EllLog ( "value : %d\n" , elf32_sym->st_value ) ;
-//			EllLog ( "size : %d\n" , elf32_sym->st_size ) ;
-//			EllLog ( "info : %d\n" , elf32_sym->st_info ) ;
-//			EllLog ( "other : %d\n" , elf32_sym->st_other ) ;
-//			EllLog ( "shndx : %d\n" , elf32_sym->st_shndx ) ;		
-
 			//	Get .data elf32_shdr
 			elf32_shdr_entry = (Elf32_Shdr* )EllElfMapNolSectGet ( obid , ".data" ) ;			
 
 			if ( !elf32_shdr_entry ) return 0 ;
-			
-			{
-				value = (int)EllLinkerMemoryPool.pool[elf32_shdr_entry->sh_entsize+elf32_rel->r_offset] ;
-			}
-
+						
 			elf32_shdr_reffer = (Elf32_Shdr* )EllElfMapNolSectGetWithIndex ( obid , elf32_sym->st_shndx ) ;	
 
 			if ( !elf32_shdr_reffer ) return 0 ;
-			//	caculate absolute address of a symbol
-			//	address = st_value + sh_addr 
-			elf32_sym->st_value = elf32_shdr_reffer->sh_addr + value ; 
-
+			
+			elf32_sym->st_value = EllCaculateRelAddress ( 
+				R_ARM_ABS32 , 
+				0 , 
+				elf32_shdr_reffer->sh_addr , 
+				0 , 
+				EllA (R_ARM_ABS32 , (char*)((int)EllLinkerMemoryPool.pool+elf32_shdr_entry->sh_entsize+elf32_rel->r_offset ) ) ;
+			
 			EllMemcpy( (void*)((int)EllLinkerMemoryPool.pool+elf32_shdr_entry->sh_entsize+elf32_rel->r_offset) , &elf32_sym->st_value , 4 ) ;
 				
 			return 1 ;

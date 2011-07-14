@@ -89,20 +89,6 @@ int EllResolver ( int obid , char* path ) {
 			} else {
 				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".PROGBITS" ) ;
 			}
-# if 0	
-
-			if ( !strcmp ( ".text" , srbuffer ) ) {
-				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".text" ) ;
-			} else if ( !strcmp ( ".data" , srbuffer ) ) {
-				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".data" ) ;
-			} else if ( !strcmp ( ".rodata" , srbuffer ) ) {
-				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".rodata" ) ;
-			} else if ( !strcmp ( ".constdata" , srbuffer ) ) {
-				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".constdata" ) ;
-			} else if ( !strcmp ( "_ell_text" , srbuffer ) ) {
-				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)"_ell_text" ) ;
-			}
-# endif			
 
 		} else if ( SHT_SYMTAB == elf32_shdr.sh_type ) {
 		
