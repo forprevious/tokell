@@ -199,11 +199,11 @@ static int EllReloc ( Elf32_Rel* reloctab , int (*EllRelocKernal) ( Elf32_Rel* e
 
 			//	global symbol detected.
 			if ( SHN_UNDEF == elf32_sym->st_shndx && STB_GLOBAL == ELF32_ST_BIND(elf32_sym->st_info) ) {
-				//EllLog ( "Ell Local Linker Warning -> external symbol : '%s' expected.\n",elf32_sym->st_name) ;
+				EllLog ( "Ell Local Linker Warning -> external symbol : '%s' expected.\n",elf32_sym->st_name) ;
 				continue ;
 			} 
 
-			//EllLog ( "Ell Local Linker Warning -> symbol : '%s' is relocated.\n",elf32_sym->st_name) ;
+			EllLog ( "Ell Local Linker Warning -> symbol : '%s' is relocated.\n",elf32_sym->st_name) ;
 			
 		} else if ( ELL_GLOBAL_LINKER == EllLinker.status ) {
 
@@ -213,11 +213,11 @@ static int EllReloc ( Elf32_Rel* reloctab , int (*EllRelocKernal) ( Elf32_Rel* e
 	
 			if ( !elf32_sym ) {
 				elf32_sym = EllDynamicPoolLocalGetSymbol ( obid , ELF32_R_SYM(elf32_rel->r_info) ) ;
-				//EllLog ( "Ell Global Linker Error -> external symbol : '%s' expected.\n",name) ;
+				EllLog ( "Ell Global Linker Error -> external symbol : '%s' expected.\n",name) ;
 				results = 0 ;
 				continue ;
 			} else {
-				//EllLog ( "Ell Global Linker Warning -> external symbol : '%s' detected.\n",elf32_sym->st_name) ;
+				EllLog ( "Ell Global Linker Warning -> external symbol : '%s' detected.\n",elf32_sym->st_name) ;
 			}
 
 		}
@@ -346,7 +346,7 @@ static int EllTextReloc ( Elf32_Rel* elf32_rel , Elf32_Sym* elf32_sym , int obid
 				0 , 
 				elf32_sym->st_value , 
 				elf32_rel->r_offset , 
-				EllA (R_ARM_THM_PC22 , (char*)((int)EllLinkerMemoryPool.pool+elf32_rel->r_offset ) ) ;
+				EllA (R_ARM_THM_PC22 , (char*)((int)EllLinkerMemoryPool.pool+elf32_rel->r_offset )) ) ;
 			
 			//	the high part of the branch offset
 			high_branch_offset = (0x3ff800 & relca) >> 11 ;
@@ -393,7 +393,7 @@ static int EllTextReloc ( Elf32_Rel* elf32_rel , Elf32_Sym* elf32_sym , int obid
 				0 , 
 				elf32_sym->st_value , 
 				elf32_rel->r_offset , 
-				EllA (R_ARM_PC24 , (char*)((int)EllLinkerMemoryPool.pool+elf32_rel->r_offset ) ) ;
+				EllA (R_ARM_PC24 , (char*)((int)EllLinkerMemoryPool.pool+elf32_rel->r_offset )) ) ;
 
 			if ( 33554430 < relca ) {
 				EllLog ( "EllReloc -> Error : offset is outside the range -33554432 to +33554430\n") ;
@@ -419,7 +419,7 @@ static int EllTextReloc ( Elf32_Rel* elf32_rel , Elf32_Sym* elf32_sym , int obid
 				0 , 
 				elf32_shdr_reffer->sh_addr , 
 				0 , 
-				EllA (R_ARM_ABS32 , (char*)((int)EllLinkerMemoryPool.pool+elf32_rel->r_offset ) ) ;
+				EllA (R_ARM_ABS32 , (char*)((int)EllLinkerMemoryPool.pool+elf32_rel->r_offset )) ) ;
 			
 			EllMemcpy( (void*)((int)EllLinkerMemoryPool.pool+elf32_rel->r_offset) , &elf32_sym->st_value , 4 ) ;
 				
@@ -466,7 +466,7 @@ static int EllDataReloc ( Elf32_Rel* elf32_rel , Elf32_Sym* elf32_sym , int obid
 				0 , 
 				elf32_shdr_reffer->sh_addr , 
 				0 , 
-				EllA (R_ARM_ABS32 , (char*)((int)EllLinkerMemoryPool.pool+elf32_shdr_entry->sh_entsize+elf32_rel->r_offset ) ) ;
+				EllA (R_ARM_ABS32 , (char*)((int)EllLinkerMemoryPool.pool+elf32_shdr_entry->sh_entsize+elf32_rel->r_offset )) ) ;
 			
 			EllMemcpy( (void*)((int)EllLinkerMemoryPool.pool+elf32_shdr_entry->sh_entsize+elf32_rel->r_offset) , &elf32_sym->st_value , 4 ) ;
 				
