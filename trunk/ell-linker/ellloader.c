@@ -64,7 +64,7 @@ int EllInstall ( int routineset , char* application ) {
 	for ( EllSlListSetIterator ( ell->ObjectList , ELLSLSEEK_HEAD ) ; EllSlListIteratorPermit  ( ell->ObjectList ) ; EllSlListIteratorNext ( ell->ObjectList ) ) {
 
 		char* objectpath = (char*) EllSlListIteratorGetElement ( ell->ObjectList ) ;
-	
+		
 		results = EllResolver ( obid , objectpath ) ;
 		
 		if ( 0 == results ) break ;
@@ -90,8 +90,12 @@ int EllInstall ( int routineset , char* application ) {
 //	EllElfMapRelocRelaDestroy ( ell->DataRela.elf32_rela , EllLinker.obidborder ) ;	
 	EllFreeEx ((void**)&ell->ObjectBased) ;
 
-	if ( !results ) EllDynamicPoolDestroy () ;
-	
+	if ( !results ) {
+		EllLog ( "Fatal Error\n" ) ;
+		EllDynamicPoolDestroy () ;
+		return 0 ;
+	}
+
 	EllDump ( "e:\\ellmem.elle" , (void*)EllLinkerMemoryPool.pool , EllLinkerMemoryPool.looper ) ;
 
 	EllLog ( "EllInstall end\n" ) ;

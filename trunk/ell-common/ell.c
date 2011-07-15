@@ -315,7 +315,7 @@ int EllDynamicPoolDestroy () {
 	EllFree ( (void*) ell->Sym.elf32_sym ) ;
 
 	EllFreeEx ( (void**)&ell ) ; 
-
+	
 	return 1 ;
 		
 }
