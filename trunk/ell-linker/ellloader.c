@@ -56,8 +56,6 @@ int EllInstall ( int routineset , char* application ) {
 	ELL* ell = (ELL* )EllDynamicPoolCreate () ;
 	EllDynamicPoolSetCurrent ( (int)ell ) ;
 	if ( !EllDynamicPoolInsertApplication ( application ) ) return 0 ;
-
-	EllLog ( "EllInstall start\n" ) ;
 	
 	EllLinker.routineset = routineset ;
 	
@@ -97,8 +95,6 @@ int EllInstall ( int routineset , char* application ) {
 	}
 
 	EllDump ( "e:\\ellmem.elle" , (void*)EllLinkerMemoryPool.pool , EllLinkerMemoryPool.looper ) ;
-
-	EllLog ( "EllInstall end\n" ) ;
 	
 	return (int)ell ;
 	
