@@ -90,6 +90,8 @@ int EllResolver ( int obid , char* path ) {
 				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".PROGBITS" ) ;
 			}
 
+			EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".PROGBITS" ) ;
+
 		} else if ( SHT_SYMTAB == elf32_shdr.sh_type ) {
 		
 			if ( !strcmp ( ".symtab" , srbuffer ) ) {			
@@ -102,8 +104,6 @@ int EllResolver ( int obid , char* path ) {
 				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".rel.text" ) ;
 			} else if ( !strcmp ( ".rel.data" , srbuffer ) ) {
 				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".rel.data" ) ;
-			} else if ( !strcmp ( ".rel_ell_text" , srbuffer ) ) {
-				EllElfMapNolSectInsert ( obid , looper , &elf32_shdr , (const char*)".rel_ell_text" ) ;
 			}
 
 		} else if ( SHT_NOBITS == elf32_shdr.sh_type ) {
@@ -160,8 +160,6 @@ int EllResolver ( int obid , char* path ) {
 	//	get .rel.text reloctab
 	aelf32_shdr = (Elf32_Shdr* ) EllElfMapNolSectGet ( obid , ".rel.text" ) ;
 	
-	if ( 0 == aelf32_shdr ) aelf32_shdr = (Elf32_Shdr* ) EllElfMapNolSectGet ( obid , ".rel_ell_text" ) ;
-
 	if ( aelf32_shdr ) {
 	
 		sh_totall = aelf32_shdr->sh_size / aelf32_shdr->sh_entsize ;

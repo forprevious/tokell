@@ -199,11 +199,11 @@ static int EllReloc ( Elf32_Rel* reloctab , int (*EllRelocKernal) ( Elf32_Rel* e
 
 			//	global symbol detected.
 			if ( SHN_UNDEF == elf32_sym->st_shndx && STB_GLOBAL == ELF32_ST_BIND(elf32_sym->st_info) ) {
-				EllLog ( "Ell Local Linker Warning -> external symbol : '%s' expected.\n",elf32_sym->st_name) ;
+				//EllLog ( "Ell LL : '%s' expected.\n",elf32_sym->st_name) ;
 				continue ;
 			} 
 
-			EllLog ( "Ell Local Linker Warning -> symbol : '%s' is relocated.\n",elf32_sym->st_name) ;
+			//EllLog ( "Ell LL : '%s' is relocated.\n",elf32_sym->st_name) ;
 			
 		} else if ( ELL_GLOBAL_LINKER == EllLinker.status ) {
 
@@ -213,11 +213,11 @@ static int EllReloc ( Elf32_Rel* reloctab , int (*EllRelocKernal) ( Elf32_Rel* e
 	
 			if ( !elf32_sym ) {
 				elf32_sym = EllDynamicPoolLocalGetSymbol ( obid , ELF32_R_SYM(elf32_rel->r_info) ) ;
-				EllLog ( "Ell Global Linker Error -> external symbol : '%s' expected.\n",name) ;
+				//EllLog ( "Ell GL : '%s' expected.\n",name) ;
 				results = 0 ;
 				continue ;
 			} else {
-				EllLog ( "Ell Global Linker Warning -> external symbol : '%s' detected.\n",elf32_sym->st_name) ;
+				//EllLog ( "Ell GL : '%s' detected.\n",elf32_sym->st_name) ;
 			}
 
 		}

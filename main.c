@@ -12,7 +12,7 @@ typedef void (*ELLENTRY) () ;
 ELLENTRY ellentry = 0 ;
 
 unsigned char* ebuffer = 0 ;
-int ebufferlength = 1024*1024 ;
+int ebufferlength = 100*1024 ;
 
 int main ( int argc , char* argv [] ) {
 
@@ -55,8 +55,8 @@ int main ( int argc , char* argv [] ) {
 //	if ( ellentry ) ellentry () ;
 
 	EllUninstall ( elllibrary ) ;
-	MMTCheckOverflow () ;
-	MMTCheckLeaked () ;
+//	MMTCheckOverflow () ;
+//	MMTCheckLeaked () ;
 
 	return 1 ;
 
