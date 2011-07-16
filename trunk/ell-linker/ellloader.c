@@ -75,7 +75,7 @@ int EllInstall ( int routineset , char* application ) {
 		
 	}
 
-	EllSlListDestroy ( ell->ObjectList ) ;
+	EllSlListDestroyEx ( ell->ObjectList ) ;
 
 	//	link all of the object-files
 	EllGlobalLinker ( obid ) ;

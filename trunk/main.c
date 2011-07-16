@@ -56,7 +56,7 @@ int main ( int argc , char* argv [] ) {
 
 	EllUninstall ( elllibrary ) ;
 //	MMTCheckOverflow () ;
-//	MMTCheckLeaked () ;
+	MMTCheckLeaked () ;
 
 	return 1 ;
 

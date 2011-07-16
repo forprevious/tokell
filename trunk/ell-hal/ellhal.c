@@ -41,7 +41,7 @@
 	# define EllFREE free
 # endif
 
-//# define MEMORY_MONITOR_ENABLE
+# define MEMORY_MONITOR_ENABLE
 # ifdef MEMORY_MONITOR_ENABLE
 # define MMT_MASK_LENGTH 1024
 unsigned char* mmt_mask = 0 ;
