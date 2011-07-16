@@ -136,6 +136,35 @@ int EllSlListDestroy ( int lt ) {
 }
 
 
+int EllSlListDestroyEx ( int lt ) {
+
+	//	author : Jelo Wang
+	//	since : 201107016
+	//	(C)TOK
+
+	//	notes : destroy a list and destroy element
+
+	ELLSLLIST* list = (ELLSLLIST* ) lt ;
+	ELLSLLIST* walker = 0 ;
+
+	if ( 0 == list ) return 1 ;
+
+	for ( walker = list->head ; walker ; ) {
+
+		list->next = walker->next ; 
+		if ( walker->element ) EllFree ( walker->element ) ;
+		EllFree ( walker ) ;
+		walker = list->next ; 
+
+	}
+
+	EllFree ( list ) ;
+
+	return 1 ;
+
+}
+
+
 int EllSlListSetIterator ( int lt , int position ) {
 
 	//	author : Jelo Wang

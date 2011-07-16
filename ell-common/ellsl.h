@@ -59,6 +59,7 @@ extern int EllSlListCreate () ;
 extern int EllSlListInsert ( int lt , int element ) ;
 extern int EllSlListDelete ( int lt , int element ) ;
 extern int EllSlListDestroy ( int lt ) ;
+extern int EllSlListDestroyEx ( int lt ) ;
 extern int EllSlListSetIterator ( int lt , int position ) ;
 extern int EllSlListIteratorPermit ( int lt ) ;
 extern int EllSlListIteratorGetElement ( int lt ) ; 
